@@ -9,8 +9,8 @@
 #define JOYSTICKS 0
 #define SENSORS 0
 
+void onConnect();
 void onDisconnect();
+void notify();
 void removePairedDevices();
 void printDeviceAddress();
-void onConnect();
-void notify();

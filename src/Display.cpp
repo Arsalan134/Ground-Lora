@@ -19,12 +19,11 @@ void drawFrame1(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int1
     display->drawString(0 + x, 0, String(ps5.LStickX()));
     display->drawString(25 + x, 0, String(ps5.RStickY()));
 
-    if (ps5.L2())
-      display->drawString(0 + x, 10, String(ps5.L2Value()));
-
-    if (ps5.R2())
-      display->drawString(25 + x, 10, String(ps5.R2Value()));
+    display->drawString(0 + x, 10, String(ps5.L2Value()));
+    display->drawString(25 + x, 10, String(ps5.R2Value()));
   }
+
+  display->drawXbm(x + 0, y + 26, ps5Icon::xres, ps5Icon::yres, ps5Icon::pixels);
 }
 
 // Demonstrates the 3 included default sizes. The fonts come from SSD1306Fonts.h file
