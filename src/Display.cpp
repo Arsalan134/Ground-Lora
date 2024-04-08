@@ -1,5 +1,5 @@
-#include "Display.h"
-#include "PS5Joystick.h"
+#include "Header Files\Display.h"
+#include "Header Files\PS5Joystick.h"
 
 // draw an xbm image.
 // Please note that everything that should be transitioned
