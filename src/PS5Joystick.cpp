@@ -1,4 +1,5 @@
 #include "PS5Joystick.h"
+#include "common.h"
 
 unsigned long lastTimeStamp = 0;
 
@@ -148,6 +149,7 @@ void notify() {
 
 void onConnect() {
   Serial.println("Connected!");
+  display.setOverlays(bluetoothOverlays, 1);
 }
 
 void onDisconnect() {

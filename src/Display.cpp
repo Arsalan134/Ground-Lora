@@ -1,29 +1,24 @@
 #include "Display.h"
 #include "PS5Joystick.h"
 
-// void drawFrame1(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int16_t y) {
-//   // draw an xbm image.
-//   // Please note that everything that should be transitioned
-//   // needs to be drawn relative to x and y
-
-//   display->drawXbm(x + 34, y + 14, valorantlogo::xres, valorantlogo::yres, valorantlogo::pixels);
-// }
-
+// draw an xbm image.
+// Please note that everything that should be transitioned
+// needs to be drawn relative to x and y
 void drawFrame1(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int16_t y) {
   display->setTextAlignment(TEXT_ALIGN_LEFT);
   display->setFont(ArialMT_Plain_10);
 
-  // display->printf("Salam L: %d  R: %d\n", 1, 2);
-
   if (ps5.isConnected()) {
-    display->drawString(0 + x, 0, String(ps5.LStickX()));
-    display->drawString(25 + x, 0, String(ps5.RStickY()));
+    display->drawString(0 + x, 10 + y, String(ps5.LStickX()));
+    display->drawString(25 + x, 10 + y, String(ps5.RStickY()));
 
-    display->drawString(0 + x, 10, String(ps5.L2Value()));
-    display->drawString(25 + x, 10, String(ps5.R2Value()));
+    display->drawString(0 + x, 20 + y, String(ps5.L2Value()));
+    display->drawString(25 + x, 20 + y, String(ps5.R2Value()));
   }
 
-  display->drawXbm(x + 0, y + 26, ps5Icon::xres, ps5Icon::yres, ps5Icon::pixels);
+  display->drawXbm(x + 0, y + 36, ps5Icon::xres, ps5Icon::yres, ps5Icon::pixels);
+
+  display->drawString(55 + x, 36 + y, "Arsalan Iravani");
 }
 
 // Demonstrates the 3 included default sizes. The fonts come from SSD1306Fonts.h file
@@ -69,8 +64,28 @@ void drawFrame4(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int1
 
 void drawFrame5(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int16_t y) {}
 
-void msOverlay(OLEDDisplay* display, OLEDDisplayUiState* state) {
-  display->setTextAlignment(TEXT_ALIGN_RIGHT);
-  display->setFont(ArialMT_Plain_10);
-  display->drawString(128, 0, String(millis()));
+// void msOverlay(OLEDDisplay* display, OLEDDisplayUiState* state) {
+//   display->setTextAlignment(TEXT_ALIGN_RIGHT);
+//   display->setFont(ArialMT_Plain_10);
+//   display->drawString(128, 0, String(millis()));
+
+//   display->setTextAlignment(TEXT_ALIGN_LEFT);
+//   display->drawXbm(0, 0, bluetoothIcon::xres, bluetoothIcon::yres, bluetoothIcon::pixels);
+// }
+
+void bluetoothOverlay(OLEDDisplay* display, OLEDDisplayUiState* state) {
+  display->setTextAlignment(TEXT_ALIGN_LEFT);
+  display->drawXbm(0, 0, bluetoothIcon::xres, bluetoothIcon::yres, bluetoothIcon::pixels);
+}
+
+void wifiOverlay(OLEDDisplay* display, OLEDDisplayUiState* state) {
+  display->setTextAlignment(TEXT_ALIGN_LEFT);
+  display->drawXbm(10, 0, wifiIcon::xres, wifiIcon::yres, wifiIcon::pixels);
+}
+
+void salam() {
+  // if (ps5.isConnected())
+  //   display.setOverlays(all, 2);
+  // else
+  //   display.setOverlays(wifiOverlays, 1);
 }

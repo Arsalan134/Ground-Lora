@@ -5,11 +5,13 @@ SSD1306Wire ui(0x3c, SDA, SCL);
 OLEDDisplayUi display(&ui);
 
 // Overlays are statically drawn on top of a frame eg. a clock
-OverlayCallback overlays[] = {msOverlay};
+OverlayCallback all[] = {bluetoothOverlay, wifiOverlay};
+OverlayCallback wifiOverlays[] = {wifiOverlay};
+OverlayCallback bluetoothOverlays[] = {bluetoothOverlay};
 
 // This array keeps function pointers to all frames
 // frames are the single views that slide in
-FrameCallback frames[] = {drawFrame1, drawFrame2, drawFrame3, drawFrame4, drawFrame5};
+FrameCallback frames[] = {drawFrame1};
 
 void setup() {
   Serial.begin(115200);
@@ -112,9 +114,10 @@ void setupDisplay() {
   // Add frames
   display.setFrames(frames, frameCount);
   display.disableAutoTransition();
+  display.disableAllIndicators();
 
   // Add overlays
-  display.setOverlays(overlays, overlaysCount);
+  // display.setOverlays(all, 2);
 
   // Initialising the UI will init the display too.
   ui.init();

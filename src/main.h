@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "common.h"
 
 // PS5
 #include <ps5Controller.h>
