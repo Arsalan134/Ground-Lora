@@ -120,15 +120,23 @@ void notify() {
 #if EVENTS
   boolean sqd = ps5.event.button_down.square, squ = ps5.event.button_up.square,
           trd = ps5.event.button_down.triangle, tru = ps5.event.button_up.triangle;
+  // crossD = ps5.event.button_down.cross, crossU = ps5.event.button_up.cross;
 
-  if (sqd)
-    Serial.println("SQUARE down");
-  else if (squ)
-    Serial.println("SQUARE up");
-  else if (trd)
-    Serial.println("TRIANGLE down");
-  else if (tru)
-    Serial.println("TRIANGLE up");
+  // if (sqd)
+  //   Serial.println("SQUARE down");
+  // else if (squ)
+  //   Serial.println("SQUARE up");
+  // else if (trd)
+  //   Serial.println("TRIANGLE down");
+  // else if (tru)
+  //   Serial.println("TRIANGLE up");
+
+  // if (crossD) {
+  //   Serial.println("Cross Button ❌");
+  //   digitalWrite(BUILTIN_LED, 1);
+  // } else if (crossU)
+  //   digitalWrite(BUILTIN_LED, 0);
+
 #endif
 
 #if BUTTONS

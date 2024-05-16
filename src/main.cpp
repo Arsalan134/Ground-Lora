@@ -38,47 +38,47 @@ void loop() {
 }
 
 void setupSD() {
-  SPI.begin(SD_SCK, SD_MISO, SD_MOSI, SD_CS);
+  // SPI.begin(SD_SCK, SD_MISO, SD_MOSI, SD_CS);
 
-  if (!SD.begin(SD_CS)) {
-    Serial.println("Card Mount Failed");
-    return;
-  }
+  // if (!SD.begin(SD_CS)) {
+  //   Serial.println("Card Mount Failed");
+  //   return;
+  // }
 
-  uint8_t cardType = SD.cardType();
+  // uint8_t cardType = SD.cardType();
 
-  if (cardType == CARD_NONE) {
-    Serial.println("No SD card attached");
-    return;
-  }
+  // if (cardType == CARD_NONE) {
+  //   Serial.println("No SD card attached");
+  //   return;
+  // }
 
-  Serial.print("SD Card Type: ");
-  if (cardType == CARD_MMC)
-    Serial.println("MMC");
-  else if (cardType == CARD_SD)
-    Serial.println("SDSC");
-  else if (cardType == CARD_SDHC)
-    Serial.println("SDHC");
-  else
-    Serial.println("UNKNOWN");
+  // Serial.print("SD Card Type: ");
+  // if (cardType == CARD_MMC)
+  //   Serial.println("MMC");
+  // else if (cardType == CARD_SD)
+  //   Serial.println("SDSC");
+  // else if (cardType == CARD_SDHC)
+  //   Serial.println("SDHC");
+  // else
+  //   Serial.println("UNKNOWN");
 
-  uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-  Serial.printf("SD Card Size: %lluMB\n", cardSize);
+  // uint64_t cardSize = SD.cardSize() / (1024 * 1024);
+  // Serial.printf("SD Card Size: %lluMB\n", cardSize);
 
-  listDir(SD, "/", 0);
-  createDir(SD, "/mydir");
-  listDir(SD, "/", 0);
-  removeDir(SD, "/mydir");
-  listDir(SD, "/", 2);
-  writeFile(SD, "/hello.txt", "Hello ");
-  appendFile(SD, "/hello.txt", "World!\n");
-  readFile(SD, "/hello.txt");
-  deleteFile(SD, "/foo.txt");
-  renameFile(SD, "/hello.txt", "/foo.txt");
-  readFile(SD, "/foo.txt");
-  testFileIO(SD, "/test.txt");
-  Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
-  Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
+  // listDir(SD, "/", 0);
+  // createDir(SD, "/mydir");
+  // listDir(SD, "/", 0);
+  // removeDir(SD, "/mydir");
+  // listDir(SD, "/", 2);
+  // writeFile(SD, "/hello.txt", "Hello ");
+  // appendFile(SD, "/hello.txt", "World!\n");
+  // readFile(SD, "/hello.txt");
+  // deleteFile(SD, "/foo.txt");
+  // renameFile(SD, "/hello.txt", "/foo.txt");
+  // readFile(SD, "/foo.txt");
+  // testFileIO(SD, "/test.txt");
+  // Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
+  // Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
 }
 
 void setupPS5() {
@@ -87,9 +87,9 @@ void setupPS5() {
   ps5.attachOnDisconnect(onDisconnect);
   // removePairedDevices();
   ps5.begin("ac:36:1b:41:ac:ed");  // MAC addresss of Joystick
-  // PS4.begin();
+
   Serial.print("This device MAC is: ");
-  // printDeviceAddress();
+  printDeviceAddress();
 }
 
 // The ESP is capable of rendering 60fps in 80Mhz mode
