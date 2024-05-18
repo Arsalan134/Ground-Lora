@@ -22,16 +22,18 @@ void setup() {
   setupDisplay();
   // setupSD();
   setupPS5();
+  setupRadio();
 }
 
 void loop() {
+  // Display
   int remainingTimeBudget = display.update();
-
-  //  radioConnection();
 
   if (remainingTimeBudget > 0) {
     // You can do some work here
     // Don't do stuff if you are below your time budget.
+
+    loraLoop();
 
     delay(remainingTimeBudget);
   }
@@ -81,14 +83,35 @@ void setupSD() {
   // Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
 }
 
+void setupRadio() {
+  LoRa.setPins(LORA_CS, LORA_RST, LORA_IRQ);
+
+  while (!LoRa.begin(frequency)) {
+    Serial.println("LoRa init failed. Check your connections.");
+    delay(200);
+  }
+
+  Serial.println("LoRa init succeeded.");
+  Serial.println();
+  Serial.println("LoRa Simple Node");
+  Serial.println("Only receive messages from gateways");
+  Serial.println("Tx: invertIQ disable");
+  Serial.println("Rx: invertIQ enable");
+  Serial.println();
+
+  LoRa.onReceive(onReceive);
+  LoRa.onTxDone(onTxDone);
+  LoRa_txMode();
+}
+
 void setupPS5() {
   ps5.attach(notify);
   ps5.attachOnConnect(onConnect);
   ps5.attachOnDisconnect(onDisconnect);
   // removePairedDevices();
-  ps5.begin("ac:36:1b:41:ac:ed");  // MAC addresss of Joystick
+  ps5.begin(MAC_ADDRESS);  // MAC addresss of Joystick
 
-  Serial.print("This device MAC is: ");
+  Serial.println("This device MAC is: ");
   printDeviceAddress();
 }
 

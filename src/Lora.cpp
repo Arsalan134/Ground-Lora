@@ -1,3 +1,62 @@
+#include <LoRa.h>
+
+void LoRa_rxMode() {
+  LoRa.enableInvertIQ();  // active invert I and Q signals
+  LoRa.receive();         // set receive mode
+}
+
+void LoRa_txMode() {
+  LoRa.idle();             // set standby mode
+  LoRa.disableInvertIQ();  // normal mode
+}
+
+void LoRa_sendMessage(String message) {
+  LoRa_txMode();         // set tx mode
+  LoRa.beginPacket();    // start packet
+  LoRa.print(message);   // add payload
+  LoRa.endPacket(true);  // finish packet and send it
+}
+
+void onReceive(int packetSize) {
+  String message = "";
+
+  while (LoRa.available()) {
+    message += (char)LoRa.read();
+  }
+
+  Serial.print("Node Receive: ");
+  Serial.println(message);
+}
+
+void onTxDone() {
+  Serial.println("TxDone");
+  LoRa_rxMode();
+}
+
+boolean runEvery(unsigned long interval) {
+  static unsigned long previousMillis = 0;
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    return true;
+  }
+
+  return false;
+}
+
+void loraLoop() {
+  if (runEvery(1000)) {
+    String message = "HeLoRa World! ";
+    message += "I'm a Node! ";
+    message += analogRead(34);
+
+    LoRa_sendMessage(message);  // send a message
+
+    Serial.println("Send Message!");
+    Serial.println(message);
+  }
+}
 
 // void radioConnection() {
 //   transmitData[throttleIndex] =
@@ -33,16 +92,16 @@
 //   transmitData[autopilotIsOnIndex] = false;
 // }
 
-#define sliderPin A0
+// #define sliderPin A0
 
-#define rollIndex 0
-#define pitchIndex 1
-#define yawIndex 2
-#define throttleIndex 3
-#define autopilotIsOnIndex 4
-#define trimIndex 5
+// #define rollIndex 0
+// #define pitchIndex 1
+// #define yawIndex 2
+// #define throttleIndex 3
+// #define autopilotIsOnIndex 4
+// #define trimIndex 5
 
-#define batteryLevelIndex 0
+// #define batteryLevelIndex 0
 
 // byte transmitData[6];
 // byte recievedData[1];

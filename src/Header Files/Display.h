@@ -2,8 +2,6 @@
 #include "SSD1306Wire.h"
 #include "images.h"
 
-// #define OLED_RST NOT_A_PIN
-
 void msOverlay(OLEDDisplay* display, OLEDDisplayUiState* state);
 void bluetoothOverlay(OLEDDisplay* display, OLEDDisplayUiState* state);
 void wifiOverlay(OLEDDisplay* display, OLEDDisplayUiState* state);
