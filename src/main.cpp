@@ -102,6 +102,12 @@ void setupRadio() {
   LoRa.onReceive(onReceive);
   LoRa.onTxDone(onTxDone);
   LoRa_txMode();
+  LoRa_rxMode();
+
+  // Send LoRa packet to receiver
+  LoRa.beginPacket();
+  LoRa.print("hello 2");
+  LoRa.endPacket();
 }
 
 void setupPS5() {

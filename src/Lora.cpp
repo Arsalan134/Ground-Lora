@@ -11,7 +11,7 @@ void LoRa_txMode() {
 }
 
 void LoRa_sendMessage(String message) {
-  LoRa_txMode();         // set tx mode
+  // LoRa_txMode();         // set tx mode
   LoRa.beginPacket();    // start packet
   LoRa.print(message);   // add payload
   LoRa.endPacket(true);  // finish packet and send it
@@ -30,7 +30,7 @@ void onReceive(int packetSize) {
 
 void onTxDone() {
   Serial.println("TxDone");
-  LoRa_rxMode();
+  // LoRa_rxMode();
 }
 
 boolean runEvery(unsigned long interval) {
@@ -46,14 +46,12 @@ boolean runEvery(unsigned long interval) {
 }
 
 void loraLoop() {
-  if (runEvery(1000)) {
-    String message = "HeLoRa World! ";
-    message += "I'm a Node! ";
+  if (runEvery(100)) {
+    String message = "";
     message += analogRead(34);
 
     LoRa_sendMessage(message);  // send a message
 
-    Serial.println("Send Message!");
     Serial.println(message);
   }
 }
