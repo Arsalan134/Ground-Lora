@@ -24,12 +24,13 @@ void onReceive(int packetSize) {
     message += (char)LoRa.read();
   }
 
-  Serial.print("Node Receive: ");
-  Serial.println(message);
+  // Serial.print("Node Receive: ");
+  // Serial.println(message);
 }
 
 void onTxDone() {
   Serial.println("TxDone");
+  digitalWrite(BUILTIN_LED, 0);
   // LoRa_rxMode();
 }
 
@@ -47,12 +48,17 @@ boolean runEvery(unsigned long interval) {
 
 void loraLoop() {
   if (runEvery(100)) {
+    digitalWrite(BUILTIN_LED, 1);
+    // delay(5);
+
     String message = "";
     message += analogRead(34);
 
     LoRa_sendMessage(message);  // send a message
-
     Serial.println(message);
+
+    // Serial.println(message);
+    Serial.println("LORA LOOP");
   }
 }
 
