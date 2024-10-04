@@ -32,11 +32,20 @@ void loop() {
   if (remainingTimeBudget > 0) {
     // You can do some work here
     // Don't do stuff if you are below your time budget.
-
+    readSlider();
     loraLoop();
 
     delay(remainingTimeBudget);
   }
+}
+
+int sendingEngineMessage;
+int sendingAileronMessage;
+int sendingRudderMessage;
+int sengindElevatorsMessage;
+
+void readSlider() {
+  sendingEngineMessage = analogRead(sliderPin);
 }
 
 void setupSD() {

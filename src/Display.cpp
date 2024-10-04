@@ -1,4 +1,5 @@
 #include "Header Files\Display.h"
+#include "Common\common.h"
 #include "Header Files\PS5Joystick.h"
 
 // draw an xbm image.
@@ -17,7 +18,7 @@ void drawFrame1(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int1
   }
 
   // Slider
-  display->drawString(60 + x, 10 + y, String(analogRead(34)));
+  display->drawString(60 + x, 10 + y, String(map(analogRead(sliderPin), 0, 4095, 0, 100)) + "%");
 
   display->drawXbm(x + 0, y + 36, ps5Icon::xres, ps5Icon::yres, ps5Icon::pixels);
 

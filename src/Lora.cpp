@@ -1,4 +1,5 @@
 #include <LoRa.h>
+#include "Common\common.h"
 
 void LoRa_rxMode() {
   LoRa.enableInvertIQ();  // active invert I and Q signals
@@ -29,7 +30,7 @@ void onReceive(int packetSize) {
 }
 
 void onTxDone() {
-  Serial.println("TxDone");
+  // Serial.println("TxDone");
   digitalWrite(BUILTIN_LED, 0);
   // LoRa_rxMode();
 }
@@ -46,21 +47,46 @@ boolean runEvery(unsigned long interval) {
   return false;
 }
 
+/*
+  engine
+  aileron
+  rudder
+  elevators
+  String
+
+  min 0. max 180
+  e0 a0 r0 el0
+*/
+
 void loraLoop() {
   if (runEvery(100)) {
     digitalWrite(BUILTIN_LED, 1);
     // delay(5);
 
-    String message = "";
-    message += analogRead(34);
+    String message = "e" + String(map(sendingEngineMessage, 0, 4095, 0, 180));
+    message += "a" + String(map(sendingAileronMessage, 0, 255, 0, 180));
 
     LoRa_sendMessage(message);  // send a message
-    Serial.println(message);
 
-    // Serial.println(message);
-    Serial.println("LORA LOOP");
+    Serial.println(message);
+    // Serial.println("LORA LOOP");
   }
 }
+
+/*
+
+
+  engine
+  left wing
+  right wing
+  rudder
+  elevators
+  String
+
+  min 0. max 180
+  en0 l0 r0 ru0 el0
+
+*/
 
 // void radioConnection() {
 //   transmitData[throttleIndex] =

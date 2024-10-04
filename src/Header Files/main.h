@@ -32,6 +32,8 @@ void LoRa_sendMessage(String message);
 void onReceive(int packetSize);
 void onTxDone();
 
+void readSlider();
+
 // void testdrawline();       // Draw many lines
 // void testdrawrect();       // Draw rectangles (outlines)
 // void testfillrect();       // Draw rectangles (filled)
