@@ -32,17 +32,21 @@ void loop() {
   if (remainingTimeBudget > 0) {
     // You can do some work here
     // Don't do stuff if you are below your time budget.
+
     readSlider();
-    loraLoop();
 
     delay(remainingTimeBudget);
+  }
+
+  if (ps5.isConnected()) {
+    loraLoop();
   }
 }
 
 int sendingEngineMessage;
 int sendingAileronMessage;
 int sendingRudderMessage;
-int sengindElevatorsMessage;
+int sendingElevatorsMessage;
 
 void readSlider() {
   sendingEngineMessage = analogRead(sliderPin);
@@ -120,10 +124,12 @@ void setupRadio() {
 }
 
 void setupPS5() {
+  removePairedDevices();
+
   ps5.attach(notify);
   ps5.attachOnConnect(onConnect);
   ps5.attachOnDisconnect(onDisconnect);
-  // removePairedDevices();
+
   ps5.begin(MAC_ADDRESS);  // MAC addresss of Joystick
 
   Serial.println("This device MAC is: ");

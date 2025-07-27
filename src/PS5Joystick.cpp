@@ -26,7 +26,7 @@ void printDeviceAddress() {
 
 // 🎮
 void notify() {
-  if (millis() - lastTimeStamp > 50) {
+  if (millis() - lastTimeStamp > 20) {
     lastTimeStamp = millis();
     // if (PS4AccelerometerEnabled) {
     //   transmitData[rollIndex] = map(constrain(PS4.getAngle(Roll), 90, 270), 270, 90, 0, 180);
@@ -109,8 +109,8 @@ void notify() {
     // 🕹️
     // int lsx = abs();
     // if (lsx > 10) {
+    // if (abs(ps5.LStickX()) > 10)
     sendingAileronMessage = ps5.LStickX() + 128;
-    // Serial.println("set to" + sendingAileronMessage);
     // }
 
     // if (abs(ps5.LStickY()) > 20)
@@ -119,9 +119,9 @@ void notify() {
     // if (abs(ps5.RStickX()) > 20)
     //   Serial.printf("Right Stick x at %d\n", ps5.RStickX());
 
-    // if (abs(ps5.RStickY()) > 20)
-    // sendingElevatorsMessage = ps5.RStickY() + 128;
-    //   Serial.printf("Right Stick y at %d\n", ps5.RStickY());
+    // if (abs(ps5.RStickY()) > 10)
+    sendingElevatorsMessage = ps5.RStickY() + 128;
+    // Serial.printf("Right Stick y at %d\n", ps5.RStickY());
 
 #if EVENTS
     boolean sqd = ps5.event.button_down.square, squ = ps5.event.button_up.square,

@@ -55,38 +55,25 @@ boolean runEvery(unsigned long interval) {
   String
 
   min 0. max 180
-  e0 a0 r0 el0
+  e0 a0   el0
 */
+
+String message = "";
 
 void loraLoop() {
   if (runEvery(100)) {
     digitalWrite(BUILTIN_LED, 1);
     // delay(5);
 
-    String message = "e" + String(map(sendingEngineMessage, 0, 4095, 0, 180));
+    message = "e" + String(map(sendingEngineMessage, 0, 4095, 0, 180));
     message += "a" + String(map(sendingAileronMessage, 0, 255, 0, 180));
-
+    message += "el" + String(map(sendingElevatorsMessage, 0, 255, 0, 180));
     LoRa_sendMessage(message);  // send a message
 
     Serial.println(message);
     // Serial.println("LORA LOOP");
   }
 }
-
-/*
-
-
-  engine
-  left wing
-  right wing
-  rudder
-  elevators
-  String
-
-  min 0. max 180
-  en0 l0 r0 ru0 el0
-
-*/
 
 // void radioConnection() {
 //   transmitData[throttleIndex] =
