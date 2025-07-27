@@ -62,6 +62,8 @@ boolean runEvery(unsigned long interval) {
 
 String message = "";
 
+int samePacketCount = 0;
+
 void loraLoop() {
   if (runEvery(100)) {
     digitalWrite(BUILTIN_LED, 1);
