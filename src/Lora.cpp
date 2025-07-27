@@ -69,13 +69,11 @@ void loraLoop() {
     digitalWrite(BUILTIN_LED, 1);
     // delay(5);
 
-    message = "e" + String(map(sendingEngineMessage, 0, 4095, 0, 180));  // "e" is used for engine
-    message +=
-        "a" + String(map(sendingAileronMessage, 0, 255, 0, 180));        // "a" is used for ailerons
-    message += "r" + String(map(sendingRudderMessage, 0, 255, 0, 180));  // "r" is used for rudder
-    message +=
-        "l" + String(map(sendingElevatorsMessage, 0, 255, 0, 180));  // "l" is used for elevators
-    LoRa_sendMessage(message);                                       // send a message
+    message = "e" + String(map(sendingEngineMessage, 0, 4095, 0, 180));     // "e" is used for engine
+    message += "a" + String(map(sendingAileronMessage, 0, 255, 0, 180));    // "a" is used for ailerons
+    message += "r" + String(map(sendingRudderMessage, 0, 255, 0, 180));     // "r" is used for rudder
+    message += "l" + String(map(sendingElevatorsMessage, 0, 255, 0, 180));  // "l" is used for elevators
+    LoRa_sendMessage(message);                                              // send a message
 
     Serial.println(message);
     // Serial.println("LORA LOOP");
