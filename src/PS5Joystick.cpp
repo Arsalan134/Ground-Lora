@@ -118,6 +118,7 @@ void notify() {
 
     // if (abs(ps5.RStickX()) > 20)
     //   Serial.printf("Right Stick x at %d\n", ps5.RStickX());
+    sendingRudderMessage = ps5.RStickX() + 128;
 
     // if (abs(ps5.RStickY()) > 10)
     sendingElevatorsMessage = ps5.RStickY() + 128;

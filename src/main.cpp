@@ -43,10 +43,10 @@ void loop() {
   }
 }
 
-int sendingEngineMessage;
-int sendingAileronMessage;
-int sendingRudderMessage;
-int sendingElevatorsMessage;
+int sendingEngineMessage = 0;
+int sendingAileronMessage = 127;
+int sendingRudderMessage = 127;
+int sendingElevatorsMessage = 127;
 
 void readSlider() {
   sendingEngineMessage = analogRead(sliderPin);
