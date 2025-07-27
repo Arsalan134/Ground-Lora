@@ -56,7 +56,8 @@ boolean runEvery(unsigned long interval) {
 
   min 0. max 180
 
-  e0 a0  r0 el0
+  e0 a0  r0 l0
+  e0a90r89l91 example payload sending
 */
 
 String message = "";
@@ -69,7 +70,7 @@ void loraLoop() {
     message = "e" + String(map(sendingEngineMessage, 0, 4095, 0, 180));
     message += "a" + String(map(sendingAileronMessage, 0, 255, 0, 180));
     message += "r" + String(map(sendingRudderMessage, 0, 255, 0, 180));
-    message += "el" + String(map(sendingElevatorsMessage, 0, 255, 0, 180));
+    message += "l" + String(map(sendingElevatorsMessage, 0, 255, 0, 180));
     LoRa_sendMessage(message);  // send a message
 
     Serial.println(message);
