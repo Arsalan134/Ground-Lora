@@ -61,20 +61,33 @@ boolean runEvery(unsigned long interval) {
 */
 
 String message = "";
+String previousMessage = "";
 
 int samePacketCount = 0;
 
 void loraLoop() {
   if (runEvery(100)) {
-    digitalWrite(BUILTIN_LED, 1);
     // delay(5);
 
     message = "e" + String(map(sendingEngineMessage, 0, 4095, 0, 180));     // "e" is used for engine
     message += "a" + String(map(sendingAileronMessage, 0, 255, 0, 180));    // "a" is used for ailerons
     message += "r" + String(map(sendingRudderMessage, 0, 255, 0, 180));     // "r" is used for rudder
     message += "l" + String(map(sendingElevatorsMessage, 0, 255, 0, 180));  // "l" is used for elevators
-    LoRa_sendMessage(message);                                              // send a message
 
+    if (message == previousMessage && samePacketCount >= 3) {
+      Serial.println("Same packet sent multiple times, skipping sending.");
+      return;  // Skip sending if the same packet is sent multiple times
+    }
+
+    digitalWrite(BUILTIN_LED, 1);
+    LoRa_sendMessage(message);  // send a message
+
+    if (message == previousMessage)
+      samePacketCount++;
+    else 
+      samePacketCount = 0;
+
+    previousMessage = message;
     Serial.println(message);
     // Serial.println("LORA LOOP");
   }
