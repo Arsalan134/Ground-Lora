@@ -84,7 +84,7 @@ void loraLoop() {
 
     if (message == previousMessage)
       samePacketCount++;
-    else 
+    else
       samePacketCount = 0;
 
     previousMessage = message;
