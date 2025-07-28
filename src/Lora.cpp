@@ -87,7 +87,10 @@ void loraLoop() {
     message += "#";
     message += checksum;
 
-    if (checksum == previousChecksum && samePacketCount >= 5) {  // add only if it is in neutral position
+    int deviation = sendingAileronMessage + sendingRudderMessage - sendingElevatorsMessage;
+
+    Serial.println("Deviation: " + String(deviation));
+    if (checksum == previousChecksum && samePacketCount >= 10 && deviation < 130) {  // only if joysticks are in neutral position
       Serial.println("Same packet sent multiple times, skipping sending.");
       return;  // Skip sending if the same packet is sent multiple times
     }
