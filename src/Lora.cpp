@@ -61,9 +61,17 @@ boolean runEvery(unsigned long interval) {
 */
 
 String message = "";
-String previousMessage = "";
+byte previousChecksum = 0;
 
 int samePacketCount = 0;
+
+byte simple_checksum(const byte* data, size_t len) {
+  byte sum = 0;
+  for (size_t i = 0; i < len; i++) {
+    sum ^= data[i];
+  }
+  return sum;
+}
 
 void loraLoop() {
   if (runEvery(100)) {
@@ -74,7 +82,12 @@ void loraLoop() {
     message += "r" + String(map(sendingRudderMessage, 0, 255, 0, 180));     // "r" is used for rudder
     message += "l" + String(map(sendingElevatorsMessage, 0, 255, 0, 180));  // "l" is used for elevators
 
-    if (message == previousMessage && samePacketCount >= 3) {
+    byte checksum = simple_checksum((const byte*)message.c_str(), message.length());
+
+    message += "#";
+    message += checksum;
+
+    if (checksum == previousChecksum && samePacketCount >= 5) {  // add only if it is in neutral position
       Serial.println("Same packet sent multiple times, skipping sending.");
       return;  // Skip sending if the same packet is sent multiple times
     }
@@ -82,14 +95,13 @@ void loraLoop() {
     digitalWrite(BUILTIN_LED, 1);
     LoRa_sendMessage(message);  // send a message
 
-    if (message == previousMessage)
+    if (checksum == previousChecksum)
       samePacketCount++;
     else
       samePacketCount = 0;
 
-    previousMessage = message;
+    previousChecksum = checksum;
     Serial.println(message);
-    // Serial.println("LORA LOOP");
   }
 }
 
