@@ -19,3 +19,5 @@ extern int sendingEngineMessage;
 extern int sendingAileronMessage;
 extern int sendingRudderMessage;
 extern int sendingElevatorsMessage;
+
+#define idleDeviationThreshold 10

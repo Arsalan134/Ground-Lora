@@ -74,9 +74,7 @@ byte simple_checksum(const byte* data, size_t len) {
 }
 
 void loraLoop() {
-  if (runEvery(100)) {
-    // delay(5);
-
+  if (runEvery(50)) {
     message = "e" + String(map(sendingEngineMessage, 0, 4095, 0, 180));     // "e" is used for engine
     message += "a" + String(map(sendingAileronMessage, 0, 255, 0, 180));    // "a" is used for ailerons
     message += "r" + String(map(sendingRudderMessage, 0, 255, 0, 180));     // "r" is used for rudder
@@ -87,12 +85,17 @@ void loraLoop() {
     message += "#";
     message += checksum;
 
-    int deviation = sendingAileronMessage + sendingRudderMessage - sendingElevatorsMessage;
+    int aileronDeviation = abs(sendingAileronMessage - 127);
+    int rudderDeviation = abs(sendingRudderMessage - 127);
+    int elevatorsDeviation = abs(sendingElevatorsMessage - 127);
 
-    Serial.println("Deviation: " + String(deviation));
-    if (checksum == previousChecksum && samePacketCount >= 10 && deviation < 130) {  // only if joysticks are in neutral position
-      Serial.println("Same packet sent multiple times, skipping sending.");
-      return;  // Skip sending if the same packet is sent multiple times
+    int totalDeviation = aileronDeviation + rudderDeviation + elevatorsDeviation;
+    Serial.println("Deviation: " + String(totalDeviation));
+
+    // Skip sending if the same packet is sent multiple times
+    if (checksum == previousChecksum && samePacketCount >= 10 &&
+        totalDeviation < idleDeviationThreshold) {  // only if joysticks are in neutral position
+      return;
     }
 
     digitalWrite(BUILTIN_LED, 1);
