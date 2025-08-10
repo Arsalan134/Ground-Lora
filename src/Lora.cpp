@@ -12,6 +12,7 @@ void LoRa_txMode() {
 }
 
 void LoRa_sendMessage(String message) {
+  digitalWrite(BUILTIN_LED, 1);
   // LoRa_txMode();         // set tx mode
   LoRa.beginPacket();    // start packet
   LoRa.print(message);   // add payload
@@ -75,10 +76,10 @@ byte simple_checksum(const byte* data, size_t len) {
 
 void loraLoop() {
   if (runEvery(50)) {
-    message = "e" + String(map(sendingEngineMessage, 0, 4095, 0, 180));     // "e" is used for engine
-    message += "a" + String(map(sendingAileronMessage, 0, 255, 0, 180));    // "a" is used for ailerons
-    message += "r" + String(map(sendingRudderMessage, 0, 255, 0, 180));     // "r" is used for rudder
-    message += "l" + String(map(sendingElevatorsMessage, 0, 255, 0, 180));  // "l" is used for elevators
+    message = "e" + String(isEmergencyStopEnabled ? 0 : map(sendingEngineMessage, 0, 4095, 0, 180));  // "e" is used for engine
+    message += "a" + String(map(sendingAileronMessage, 0, 255, 0, 180));                              // "a" is used for ailerons
+    message += "r" + String(map(sendingRudderMessage, 0, 255, 0, 180));                               // "r" is used for rudder
+    message += "l" + String(map(sendingElevatorsMessage, 0, 255, 0, 180));                            // "l" is used for elevators
 
     byte checksum = simple_checksum((const byte*)message.c_str(), message.length());
 
@@ -90,7 +91,6 @@ void loraLoop() {
     int elevatorsDeviation = abs(sendingElevatorsMessage - 127);
 
     int totalDeviation = aileronDeviation + rudderDeviation + elevatorsDeviation;
-    Serial.println("Deviation: " + String(totalDeviation));
 
     // Skip sending if the same packet is sent multiple times
     if (checksum == previousChecksum && samePacketCount >= 10 &&
@@ -98,7 +98,6 @@ void loraLoop() {
       return;
     }
 
-    digitalWrite(BUILTIN_LED, 1);
     LoRa_sendMessage(message);  // send a message
 
     if (checksum == previousChecksum)
@@ -107,7 +106,6 @@ void loraLoop() {
       samePacketCount = 0;
 
     previousChecksum = checksum;
-    Serial.println(message);
   }
 }
 

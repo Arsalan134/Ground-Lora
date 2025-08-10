@@ -16,8 +16,10 @@ extern OverlayCallback wifiOverlays[];
 extern OverlayCallback bluetoothOverlays[];
 
 extern int sendingEngineMessage;
-extern int sendingAileronMessage;
-extern int sendingRudderMessage;
-extern int sendingElevatorsMessage;
+extern byte sendingAileronMessage;
+extern byte sendingRudderMessage;
+extern byte sendingElevatorsMessage;
+
+extern bool isEmergencyStopEnabled;
 
 #define idleDeviationThreshold 10

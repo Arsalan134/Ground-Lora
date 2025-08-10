@@ -13,6 +13,9 @@ OverlayCallback bluetoothOverlays[] = {bluetoothOverlay};
 // frames are the single views that slide in
 FrameCallback frames[] = {drawFrame1};
 
+bool setToZeroEngineSlider = false;
+bool isEmergencyStopEnabled = true;
+
 void setup() {
   Serial.begin(115200);
 
@@ -38,18 +41,27 @@ void loop() {
     delay(remainingTimeBudget);
   }
 
-  if (ps5.isConnected()) {
-    loraLoop();
+  if (!sendingEngineMessage)       // If engine message is not being sent
+    setToZeroEngineSlider = true;  // Set the slider to zero. For safety measures
+
+  if (!setToZeroEngineSlider && sendingEngineMessage) {
+    // For safety measures, if engine value is non zero, return
+    Serial.println("Engine value is non zero, returning.");
+    delay(100);
+    return;
   }
+
+  if (ps5.isConnected())
+    loraLoop();
 }
 
-int sendingEngineMessage = 0;
-int sendingAileronMessage = 127;
-int sendingRudderMessage = 127;
-int sendingElevatorsMessage = 127;
+int sendingEngineMessage = 1;
+byte sendingAileronMessage = 127;
+byte sendingRudderMessage = 127;
+byte sendingElevatorsMessage = 127;
 
 void readSlider() {
-  sendingEngineMessage = analogRead(sliderPin);
+  sendingEngineMessage = max((int)analogRead(sliderPin), (int)map(ps5.R2Value(), 0, 255, 0, 4095));
 }
 
 void setupSD() {
@@ -119,7 +131,7 @@ void setupRadio() {
 
   // Send LoRa packet to receiver
   LoRa.beginPacket();
-  LoRa.print("hello 2");
+  LoRa.print("Setup is Completed!");
   LoRa.endPacket();
 }
 

@@ -54,11 +54,13 @@ void notify() {
     if (ps5.Cross()) {
       // Serial.println("Cross Button ❌");
       digitalWrite(BUILTIN_LED, 1);
+      isEmergencyStopEnabled = false;
     } else {
       digitalWrite(BUILTIN_LED, 0);
     }
 
-    // if (ps5.Circle())
+    if (ps5.Circle())
+      isEmergencyStopEnabled = true;
     //   Serial.println("Circle Button ⭕");
 
     // if (ps5.Triangle())
@@ -125,8 +127,8 @@ void notify() {
     // Serial.printf("Right Stick y at %d\n", ps5.RStickY());
 
 #if EVENTS
-    boolean sqd = ps5.event.button_down.square, squ = ps5.event.button_up.square,
-            trd = ps5.event.button_down.triangle, tru = ps5.event.button_up.triangle;
+    boolean sqd = ps5.event.button_down.square, squ = ps5.event.button_up.square, trd = ps5.event.button_down.triangle,
+            tru = ps5.event.button_up.triangle;
     // crossD = ps5.event.button_down.cross, crossU = ps5.event.button_up.cross;
 
     // if (sqd)
