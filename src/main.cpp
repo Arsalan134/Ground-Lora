@@ -16,6 +16,8 @@ FrameCallback frames[] = {drawFrame1};
 bool setToZeroEngineSlider = false;
 bool isEmergencyStopEnabled = true;
 
+static unsigned long lastDisplayUpdate = 0;
+
 void setup() {
   Serial.begin(115200);
 
@@ -59,6 +61,7 @@ int sendingEngineMessage = 1;
 byte sendingAileronMessage = 127;
 byte sendingRudderMessage = 127;
 byte sendingElevatorsMessage = 127;
+int sendingTrimMessage = 0;
 
 void readSlider() {
   sendingEngineMessage = max((int)analogRead(sliderPin), (int)map(ps5.R2Value(), 0, 255, 0, 4095));

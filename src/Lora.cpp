@@ -80,6 +80,9 @@ void loraLoop() {
     message += "a" + String(map(sendingAileronMessage, 0, 255, 0, 180));                              // "a" is used for ailerons
     message += "r" + String(map(sendingRudderMessage, 0, 255, 0, 180));                               // "r" is used for rudder
     message += "l" + String(map(sendingElevatorsMessage, 0, 255, 0, 180));                            // "l" is used for elevators
+    message += "t" + String(sendingTrimMessage);                                                      // "t" is used for trim
+
+    sendingTrimMessage = 0;
 
     byte checksum = simple_checksum((const byte*)message.c_str(), message.length());
 
@@ -100,6 +103,8 @@ void loraLoop() {
 
     LoRa_sendMessage(message);  // send a message
 
+    Serial.println("LoRa Send: " + message);
+
     if (checksum == previousChecksum)
       samePacketCount++;
     else
@@ -108,53 +113,3 @@ void loraLoop() {
     previousChecksum = checksum;
   }
 }
-
-// void radioConnection() {
-//   transmitData[throttleIndex] =
-//       emergencyStopIsActive ? 0 : max(map(L2Value, 0, 255, 0, 90), map(R2Value, 0, 255, 0, 180));
-
-//   trim = constrain(trim, 90 - 45, 90 + 45);
-
-//   transmitData[trimIndex] = trim;
-
-//   radio.stopListening();
-
-//   if (radio.write(&transmitData, sizeof(transmitData)))
-//     radio.startListening();
-//   else
-//     Serial.println("Failed to transmit !");
-
-//   while (radio.available()) {
-//     radio.read(&recievedData, sizeof(recievedData));
-//     lastRecievedTime = millis();
-//   }
-
-//   setLEDColor();
-
-//   // Serial.print("Elapsed: ");
-//   // Serial.println(millis() - lastRecievedTime);
-// }
-
-// void reset() {
-//   transmitData[rollIndex] = 90;
-//   transmitData[pitchIndex] = 90;
-//   transmitData[yawIndex] = 90;
-
-//   transmitData[autopilotIsOnIndex] = false;
-// }
-
-// #define sliderPin A0
-
-// #define rollIndex 0
-// #define pitchIndex 1
-// #define yawIndex 2
-// #define throttleIndex 3
-// #define autopilotIsOnIndex 4
-// #define trimIndex 5
-
-// #define batteryLevelIndex 0
-
-// byte transmitData[6];
-// byte recievedData[1];
-
-// unsigned long lastRecievedTime = millis();

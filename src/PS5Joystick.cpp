@@ -33,11 +33,13 @@ void notify() {
     //   transmitData[pitchIndex] = map(constrain(PS4.getAngle(Pitch), 90, 270), 270, 90, 0, 180);
     // }
 
-    // if (ps5.Up())
+    if (ps5.Up())
+      sendingTrimMessage = 1;
     //   Serial.println("Up Button ⬆️");
     // trim += trimStep;
 
-    // if (ps5.Down())
+    if (ps5.Down())
+      sendingTrimMessage = -1;
     //   Serial.println("Down Button ⬇️");
     //  trim -= trimStep;
 

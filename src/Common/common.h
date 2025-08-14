@@ -19,6 +19,7 @@ extern int sendingEngineMessage;
 extern byte sendingAileronMessage;
 extern byte sendingRudderMessage;
 extern byte sendingElevatorsMessage;
+extern int sendingTrimMessage;
 
 extern bool isEmergencyStopEnabled;
 
