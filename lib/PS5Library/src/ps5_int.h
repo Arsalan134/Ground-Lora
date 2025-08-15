@@ -12,8 +12,7 @@
 #elif defined CONFIG_BTDM_CONTROLLER_MODE_BR_EDR_ONLY
 #define BT_MODE ESP_BT_MODE_CLASSIC_BT
 #else
-#error \
-  "The selected Bluetooth controller mode is not supported by the ESP32-ps5 module"
+#error "The selected Bluetooth controller mode is not supported by the ESP32-ps5 module"
 #endif
 
 #endif  // ARDUINO_ARCH_ESP32
@@ -29,7 +28,6 @@
 #include <core_version.h>
 #endif
 
-
 /* Arduino releases using IDF v3.2.3 */
 #if defined(ARDUINO_ESP32_RELEASE_1_0_4) || defined(ARDUINO_ESP32_RELEASE_1_0_3)
 #define ESP_IDF_VERSION_MAJOR 3
@@ -38,7 +36,8 @@
 #endif
 
 /* Arduino releases using IDF v3.2.2 */
-#if defined(ARDUINO_ESP32_RELEASE_1_0_3) || defined(ARDUINO_ESP32_RELEASE_1_0_2) || defined(ARDUINO_ESP32_RELEASE_1_0_1) || defined(ARDUINO_ESP32_RELEASE_1_0_0)
+#if defined(ARDUINO_ESP32_RELEASE_1_0_3) || defined(ARDUINO_ESP32_RELEASE_1_0_2) || defined(ARDUINO_ESP32_RELEASE_1_0_1) || \
+    defined(ARDUINO_ESP32_RELEASE_1_0_0)
 #define ESP_IDF_VERSION_MAJOR 3
 #define ESP_IDF_VERSION_MINOR 2
 #define ESP_IDF_VERSION_PATCH 2
@@ -48,11 +47,9 @@
 #define ESP_IDF_VERSION_VAL(major, minor, patch) ((major << 16) | (minor << 8) | (patch))
 
 // Current IDF version, as an integer
-#define ESP_IDF_VERSION  ESP_IDF_VERSION_VAL(ESP_IDF_VERSION_MAJOR, \
-                                             ESP_IDF_VERSION_MINOR, \
-                                             ESP_IDF_VERSION_PATCH)
+#define ESP_IDF_VERSION ESP_IDF_VERSION_VAL(ESP_IDF_VERSION_MAJOR, ESP_IDF_VERSION_MINOR, ESP_IDF_VERSION_PATCH)
 
-#endif // __has_include("esp_idf_version.h")
+#endif  // __has_include("esp_idf_version.h")
 
 /** ESP-IDF compatibility configuration option choices */
 #define IDF_COMPATIBILITY_MASTER_21165ED 3
@@ -72,16 +69,9 @@
 /*                         S H A R E D   T Y P E S */
 /********************************************************************************/
 
-enum hid_cmd_code {
-  hid_cmd_code_set_report = 0x50,
-  hid_cmd_code_type_output = 0x02,
-  hid_cmd_code_type_feature = 0x03
-};
+enum hid_cmd_code { hid_cmd_code_set_report = 0x50, hid_cmd_code_type_output = 0x02, hid_cmd_code_type_feature = 0x03 };
 
-enum hid_cmd_identifier {
-  hid_cmd_identifier_ps5_enable = 0xF4,
-  hid_cmd_identifier_ps5_control = 0x11
-};
+enum hid_cmd_identifier { hid_cmd_identifier_ps5_enable = 0xF4, hid_cmd_identifier_ps5_control = 0x11 };
 
 typedef struct {
   uint8_t code;
@@ -113,6 +103,7 @@ void ps5PacketEvent(ps5_t ps5, ps5_event_t event);
 /********************************************************************************/
 
 void parsePacket(uint8_t* packet);
+void parsePacketWithLength(uint8_t* packet, uint16_t length);
 
 /********************************************************************************/
 /*                          S P P   F U N C T I O N S */
@@ -126,6 +117,6 @@ void sppInit();
 
 void ps5_l2cap_init_services();
 void ps5_l2cap_deinit_services();
-void ps5_l2cap_send_hid(hid_cmd_t *hid_cmd, uint8_t len);
+void ps5_l2cap_send_hid(hid_cmd_t* hid_cmd, uint8_t len);
 
 #endif
