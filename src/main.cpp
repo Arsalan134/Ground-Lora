@@ -4,11 +4,6 @@
 SSD1306Wire ui(0x3c, SDA, SCL);
 OLEDDisplayUi display(&ui);
 
-// Overlays are statically drawn on top of a frame eg. a clock
-OverlayCallback all[] = {bluetoothOverlay, wifiOverlay};
-OverlayCallback wifiOverlays[] = {wifiOverlay};
-OverlayCallback bluetoothOverlays[] = {bluetoothOverlay};
-
 // This array keeps function pointers to all frames
 // frames are the single views that slide in
 FrameCallback frames[] = {drawFrame1};

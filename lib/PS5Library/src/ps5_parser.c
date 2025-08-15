@@ -84,7 +84,9 @@ static ps5_event_callback_t ps5_event_cb = NULL;
 /********************************************************************************/
 /*                      P U B L I C    F U N C T I O N S */
 /********************************************************************************/
-void parserSetEventCb(ps5_event_callback_t cb) { ps5_event_cb = cb; }
+void parserSetEventCb(ps5_event_callback_t cb) {
+  ps5_event_cb = cb;
+}
 
 void parsePacket(uint8_t* packet) {
   ps5_t prev_ps5 = ps5;
@@ -141,33 +143,33 @@ ps5_event_t parseEvent(ps5_t prev, ps5_t cur) {
   ps5Event.button_down.touchpad = !prev.button.touchpad && cur.button.touchpad;
 
   /* Button up events */
-  ps5Event.button_down.right = prev.button.right && !cur.button.right;
-  ps5Event.button_down.down = prev.button.down && !cur.button.down;
-  ps5Event.button_down.up = prev.button.up && !cur.button.up;
-  ps5Event.button_down.left = prev.button.left && !cur.button.left;
+  ps5Event.button_up.right = prev.button.right && !cur.button.right;
+  ps5Event.button_up.down = prev.button.down && !cur.button.down;
+  ps5Event.button_up.up = prev.button.up && !cur.button.up;
+  ps5Event.button_up.left = prev.button.left && !cur.button.left;
 
-  ps5Event.button_down.square = prev.button.square && !cur.button.square;
-  ps5Event.button_down.cross = prev.button.cross && !cur.button.cross;
-  ps5Event.button_down.circle = prev.button.circle && !cur.button.circle;
-  ps5Event.button_down.triangle = prev.button.triangle && !cur.button.triangle;
+  ps5Event.button_up.square = prev.button.square && !cur.button.square;
+  ps5Event.button_up.cross = prev.button.cross && !cur.button.cross;
+  ps5Event.button_up.circle = prev.button.circle && !cur.button.circle;
+  ps5Event.button_up.triangle = prev.button.triangle && !cur.button.triangle;
 
-  ps5Event.button_down.upright = prev.button.upright && !cur.button.upright;
-  ps5Event.button_down.downright = prev.button.downright && !cur.button.downright;
-  ps5Event.button_down.upleft = prev.button.upleft && !cur.button.upleft;
-  ps5Event.button_down.downleft = prev.button.downleft && !cur.button.downleft;
+  ps5Event.button_up.upright = prev.button.upright && !cur.button.upright;
+  ps5Event.button_up.downright = prev.button.downright && !cur.button.downright;
+  ps5Event.button_up.upleft = prev.button.upleft && !cur.button.upleft;
+  ps5Event.button_up.downleft = prev.button.downleft && !cur.button.downleft;
 
-  ps5Event.button_down.l1 = prev.button.l1 && !cur.button.l1;
-  ps5Event.button_down.r1 = prev.button.r1 && !cur.button.r1;
-  ps5Event.button_down.l2 = prev.button.l2 && !cur.button.l2;
-  ps5Event.button_down.r2 = prev.button.r2 && !cur.button.r2;
+  ps5Event.button_up.l1 = prev.button.l1 && !cur.button.l1;
+  ps5Event.button_up.r1 = prev.button.r1 && !cur.button.r1;
+  ps5Event.button_up.l2 = prev.button.l2 && !cur.button.l2;
+  ps5Event.button_up.r2 = prev.button.r2 && !cur.button.r2;
 
-  ps5Event.button_down.share = prev.button.share && !cur.button.share;
-  ps5Event.button_down.options = prev.button.options && !cur.button.options;
-  ps5Event.button_down.l3 = prev.button.l3 && !cur.button.l3;
-  ps5Event.button_down.r3 = prev.button.r3 && !cur.button.r3;
+  ps5Event.button_up.share = prev.button.share && !cur.button.share;
+  ps5Event.button_up.options = prev.button.options && !cur.button.options;
+  ps5Event.button_up.l3 = prev.button.l3 && !cur.button.l3;
+  ps5Event.button_up.r3 = prev.button.r3 && !cur.button.r3;
 
-  ps5Event.button_down.ps = prev.button.ps && !cur.button.ps;
-  ps5Event.button_down.touchpad = prev.button.touchpad && !cur.button.touchpad;
+  ps5Event.button_up.ps = prev.button.ps && !cur.button.ps;
+  ps5Event.button_up.touchpad = prev.button.touchpad && !cur.button.touchpad;
 
   ps5Event.analog_move.stick.lx = cur.analog.stick.lx != 0;
   ps5Event.analog_move.stick.ly = cur.analog.stick.ly != 0;
@@ -251,9 +253,9 @@ ps5_status_t parsePacketStatus(uint8_t* packet) {
   ps5_status_t ps5Status;
 
   ps5Status.battery = packet[packet_index_status] & ps5_status_mask_battery;
-  ps5Status.charging = packet[packet_index_status] & ps5_status_mask_charging ? true : false;
-  ps5Status.audio = packet[packet_index_status] & ps5_status_mask_audio ? true : false;
-  ps5Status.mic = packet[packet_index_status] & ps5_status_mask_mic ? true : false;
+  ps5Status.charging = (packet[packet_index_status] & ps5_status_mask_charging) != 0 ? true : false;
+  ps5Status.audio = (packet[packet_index_status] & ps5_status_mask_audio) != 0 ? true : false;
+  ps5Status.mic = (packet[packet_index_status] & ps5_status_mask_mic) != 0 ? true : false;
 
   return ps5Status;
 }

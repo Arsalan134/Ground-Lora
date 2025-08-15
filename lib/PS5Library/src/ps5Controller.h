@@ -35,7 +35,7 @@ class ps5Controller {
 
   uint8_t* LatestPacket() { return data.latestPacket; }
 
-public:
+ public:
   bool Right() { return data.button.right; }
   bool Down() { return data.button.down; }
   bool Up() { return data.button.up; }

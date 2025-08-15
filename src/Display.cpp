@@ -2,6 +2,9 @@
 #include "Common\common.h"
 #include "Header Files\PS5Joystick.h"
 
+// Overlays are statically drawn on top of a frame eg. a clock
+OverlayCallback allOverlays[] = {/*wifiOverlay,*/ batteryOverlay, bluetoothOverlay, chargingOverlay};
+
 // draw an xbm image.
 // Please note that everything that should be transitioned
 // needs to be drawn relative to x and y
@@ -84,6 +87,15 @@ void drawFrame5(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int1
 void bluetoothOverlay(OLEDDisplay* display, OLEDDisplayUiState* state) {
   display->setTextAlignment(TEXT_ALIGN_LEFT);
   display->drawXbm(0, 0, bluetoothIcon::xres, bluetoothIcon::yres, bluetoothIcon::pixels);
+}
+
+void batteryOverlay(OLEDDisplay* display, OLEDDisplayUiState* state) {
+  display->setTextAlignment(TEXT_ALIGN_RIGHT);
+  display->drawString(120, 0, String(batteryPercentage) + " %");
+}
+
+void chargingOverlay(OLEDDisplay* display, OLEDDisplayUiState* state) {
+  display->drawXbm(85, 0, batteryChargingIcon::xres, batteryChargingIcon::yres, batteryChargingIcon::pixels);
 }
 
 void wifiOverlay(OLEDDisplay* display, OLEDDisplayUiState* state) {

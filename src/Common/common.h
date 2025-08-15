@@ -9,11 +9,7 @@
 
 extern OLEDDisplayUi display;
 
-// Overlays are statically drawn on top of a frame eg. a clock
-// OverlayCallback overlays[] = {msOverlay};
-extern OverlayCallback all[];
-extern OverlayCallback wifiOverlays[];
-extern OverlayCallback bluetoothOverlays[];
+extern OverlayCallback allOverlays[];
 
 extern int sendingEngineMessage;
 extern byte sendingAileronMessage;
@@ -29,5 +25,7 @@ extern bool isEmergencyStopEnabled;
 extern bool airbrakeEnabled;
 
 extern bool PS4AccelerometerEnabled;
+
+extern uint8_t batteryPercentage;
 
 #define idleDeviationThreshold 10

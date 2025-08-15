@@ -5,6 +5,8 @@
 void msOverlay(OLEDDisplay* display, OLEDDisplayUiState* state);
 void bluetoothOverlay(OLEDDisplay* display, OLEDDisplayUiState* state);
 void wifiOverlay(OLEDDisplay* display, OLEDDisplayUiState* state);
+void batteryOverlay(OLEDDisplay* display, OLEDDisplayUiState* state);
+void chargingOverlay(OLEDDisplay* display, OLEDDisplayUiState* state);
 
 // draw an xbm image.
 // Please note that everything that should be transitioned

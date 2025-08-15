@@ -6,6 +6,7 @@ unsigned long lastTimeStamp = 0;
 unsigned long lastFlapsChangeTimestamp = 0;
 
 bool PS4AccelerometerEnabled = false;
+uint8_t batteryPercentage = 0;
 
 void removePairedDevices() {
   uint8_t pairedDeviceBtAddr[20][6];
@@ -36,6 +37,13 @@ void notify() {
     // if (PS4AccelerometerEnabled) {
     //   transmitData[rollIndex] = map(constrain(PS4.getAngle(Roll), 90, 270), 270, 90, 0, 180);
     // }
+
+    batteryPercentage = ps5.Battery();
+
+    if (ps5.Charging())
+      display.setOverlays(allOverlays, 3);
+    else
+      display.setOverlays(allOverlays, 2);
 
     if (ps5.Up())  // Up Button ⬆️
       sendingElevatorTrimMessage = 1;
@@ -146,7 +154,7 @@ void notify() {
 
 void onConnect() {
   Serial.println("Connected!");
-  display.setOverlays(bluetoothOverlays, 1);
+  display.setOverlays(allOverlays, 2);
 }
 
 void onDisconnect() {
