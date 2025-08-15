@@ -3,6 +3,8 @@
 
 unsigned long lastTimeStamp = 0;
 
+unsigned long lastFlapsChangeTimestamp = 0;
+
 void removePairedDevices() {
   uint8_t pairedDeviceBtAddr[20][6];
   int count = esp_bt_gap_get_bond_device_num();
@@ -30,103 +32,61 @@ void notify() {
     lastTimeStamp = millis();
     // if (PS4AccelerometerEnabled) {
     //   transmitData[rollIndex] = map(constrain(PS4.getAngle(Roll), 90, 270), 270, 90, 0, 180);
-    //   transmitData[pitchIndex] = map(constrain(PS4.getAngle(Pitch), 90, 270), 270, 90, 0, 180);
     // }
 
-    if (ps5.Up())
-      sendingTrimMessage = 1;
-    //   Serial.println("Up Button ⬆️");
-    // trim += trimStep;
+    if (ps5.Up())  // Up Button ⬆️
+      sendingElevatorTrimMessage = 1;
 
-    if (ps5.Down())
-      sendingTrimMessage = -1;
-    //   Serial.println("Down Button ⬇️");
-    //  trim -= trimStep;
+    if (ps5.Down())  // Down Button ⬇️
+      sendingElevatorTrimMessage = -1;
 
-    // if (ps5.Right())
-    //   Serial.println("Right Button ➡️");
+    if (ps5.Right())  // Right Button ➡️
+      sendingAileronTrimMessage = 1;
 
-    // if (ps5.Left())
-    //   Serial.println("Left Button ⬅️");
+    if (ps5.Left())  // Left Button ⬅️
+      sendingAileronTrimMessage = -1;
 
-    // if (ps5.Square())
-    //   Serial.println("Square Button ⏹️");
-    // emergencyStopIsActive = !emergencyStopIsActive;
+    // if (ps5.Square()) // Square Button ⏹️
 
-    if (ps5.Cross()) {
-      // Serial.println("Cross Button ❌");
+    if (ps5.Cross()) {  // Cross Button ❌
       digitalWrite(BUILTIN_LED, 1);
       isEmergencyStopEnabled = false;
-    } else {
+    } else
       digitalWrite(BUILTIN_LED, 0);
+
+    if (ps5.Circle())  // Circle Button ⭕
+      isEmergencyStopEnabled = true;
+
+    // if (ps5.Triangle()) // Triangle Button 🔺
+
+    if (ps5.L1() && millis() - lastFlapsChangeTimestamp > 200) {
+      sendingFlapsMessage = constrain(sendingFlapsMessage - 1, 0, 4);
+      lastFlapsChangeTimestamp = millis();
     }
 
-    if (ps5.Circle())
-      isEmergencyStopEnabled = true;
-    //   Serial.println("Circle Button ⭕");
+    if (ps5.R1() && millis() - lastFlapsChangeTimestamp > 200) {
+      sendingFlapsMessage = constrain(sendingFlapsMessage + 1, 0, 4);
+      lastFlapsChangeTimestamp = millis();
+    }
 
-    // if (ps5.Triangle())
-    //   Serial.println("Triangle Button 🔺");
-    // emergencyStopIsActive = false;
-    // transmitData[autopilotIsOnIndex] = false;
+    // if (ps5.Share()) // Share Button 🔗
 
-    // if (ps5.L1() )
-    //   Serial.println("L1 Button ");
+    // if (ps5.Options()) // Options Button ⚙️
 
-    // if (ps5.R1())
-    //   Serial.println("R1 Button");
+    if (ps5.L3())  // L3 Button 🔘
+      resetAileronTrim = true;
 
-    // if (ps5.Share())
-    //   Serial.println("Share Button");
+    if (ps5.R3())  // R3 Button 🔘
+      resetElevatorTrim = true;
 
-    // if (ps5.Options())
-    //   Serial.println("Options Button");
+    // if (ps5.PSButton()) // PS Button ⏹️
 
-    // if (ps5.L3())
-    //   Serial.println("L3 Button");
-
-    // if (ps5.R3())
-    //   Serial.println("R3 Button");
-
-    // if (ps5.PSButton())
-    //   Serial.println("PS Button");
-
-    // if (ps5.Touchpad())
-    //   Serial.println("Touch Pad Button");
-
-    // old
-    // L2Value = PS4.getAnalogButton(L2);
-    // R2Value = PS4.getAnalogButton(R2);
-
-    // if (ps5.L2())
-    //   Serial.printf("L2 button at %d\n", ps5.L2Value());
-    // transmitData[autopilotIsOnIndex] = !transmitData[autopilotIsOnIndex];
-
-    // if (ps5.R2())
-    //   Serial.printf("R2 button at %d\n", ps5.R2Value());
-    // int thrust = max(ps5.R2Value(), sliderValue);
-
-    // transmitData[rollIndex] = map(PS4.getAnalogHat(LeftHatX), 0, 255, 0, 180);
-    // transmitData[pitchIndex] = map(PS4.getAnalogHat(RightHatY), 0, 255, 0, 180);
-    // transmitData[yawIndex] = map(PS4.getAnalogHat(RightHatX), 0, 255, 0, 180);
+    // if (ps5.Touchpad()) // Touch Pad Button 🖱️
 
     // 🕹️
-    // int lsx = abs();
-    // if (lsx > 10) {
-    // if (abs(ps5.LStickX()) > 10)
     sendingAileronMessage = ps5.LStickX() + 128;
-    // }
-
-    // if (abs(ps5.LStickY()) > 20)
-    //   Serial.printf("Left Stick y at %d\n", ps5.LStickY());
-
-    // if (abs(ps5.RStickX()) > 20)
-    //   Serial.printf("Right Stick x at %d\n", ps5.RStickX());
     sendingRudderMessage = ps5.RStickX() + 128;
-
-    // if (abs(ps5.RStickY()) > 10)
     sendingElevatorsMessage = ps5.RStickY() + 128;
-    // Serial.printf("Right Stick y at %d\n", ps5.RStickY());
 
 #if EVENTS
     boolean sqd = ps5.event.button_down.square, squ = ps5.event.button_up.square, trd = ps5.event.button_down.triangle,
@@ -153,9 +113,9 @@ void notify() {
 #if BUTTONS
     boolean sq = ps5.Square(), tr = ps5.Triangle();
     if (sq)
-      Serial.print(" SQUARE pressed");
+      Serial.print("SQUARE pressed");
     if (tr)
-      Serial.print(" TRIANGLE pressed");
+      Serial.print("TRIANGLE pressed");
     if (sq | tr)
       Serial.println();
 #endif

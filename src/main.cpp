@@ -57,12 +57,6 @@ void loop() {
     loraLoop();
 }
 
-int sendingEngineMessage = 1;
-byte sendingAileronMessage = 127;
-byte sendingRudderMessage = 127;
-byte sendingElevatorsMessage = 127;
-int sendingTrimMessage = 0;
-
 void readSlider() {
   sendingEngineMessage = max((int)analogRead(sliderPin), (int)map(ps5.R2Value(), 0, 255, 0, 4095));
 }
