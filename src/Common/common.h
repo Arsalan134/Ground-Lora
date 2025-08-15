@@ -26,5 +26,8 @@ extern bool resetAileronTrim;
 extern bool resetElevatorTrim;
 
 extern bool isEmergencyStopEnabled;
+extern bool airbrakeEnabled;
+
+extern bool PS4AccelerometerEnabled;
 
 #define idleDeviationThreshold 10

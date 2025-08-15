@@ -5,6 +5,8 @@ unsigned long lastTimeStamp = 0;
 
 unsigned long lastFlapsChangeTimestamp = 0;
 
+bool PS4AccelerometerEnabled = false;
+
 void removePairedDevices() {
   uint8_t pairedDeviceBtAddr[20][6];
   int count = esp_bt_gap_get_bond_device_num();
@@ -30,6 +32,7 @@ void printDeviceAddress() {
 void notify() {
   if (millis() - lastTimeStamp > 20) {
     lastTimeStamp = millis();
+
     // if (PS4AccelerometerEnabled) {
     //   transmitData[rollIndex] = map(constrain(PS4.getAngle(Roll), 90, 270), 270, 90, 0, 180);
     // }
@@ -51,6 +54,7 @@ void notify() {
     if (ps5.Cross()) {  // Cross Button ❌
       digitalWrite(BUILTIN_LED, 1);
       isEmergencyStopEnabled = false;
+      airbrakeEnabled = false;
     } else
       digitalWrite(BUILTIN_LED, 0);
 
@@ -71,7 +75,8 @@ void notify() {
 
     // if (ps5.Share()) // Share Button 🔗
 
-    // if (ps5.Options()) // Options Button ⚙️
+    if (ps5.Options())  // Options Button ⚙️
+      PS4AccelerometerEnabled = !PS4AccelerometerEnabled;
 
     if (ps5.L3())  // L3 Button 🔘
       resetAileronTrim = true;
@@ -79,7 +84,8 @@ void notify() {
     if (ps5.R3())  // R3 Button 🔘
       resetElevatorTrim = true;
 
-    // if (ps5.PSButton()) // PS Button ⏹️
+    if (ps5.PSButton())  // PS Button ⏹️
+      airbrakeEnabled = true;
 
     // if (ps5.Touchpad()) // Touch Pad Button 🖱️
 

@@ -10,6 +10,7 @@ int sendingAileronTrimMessage = 0;
 int sendingFlapsMessage = 0;  // 0, 1, 2, 3, 4
 bool resetAileronTrim = false;
 bool resetElevatorTrim = false;
+bool airbrakeEnabled = false;
 
 void LoRa_rxMode() {
   LoRa.enableInvertIQ();  // active invert I and Q signals
@@ -79,6 +80,7 @@ void loraLoop() {
     message += "f" + String(sendingFlapsMessage);                                                     // "f" is used for flaps
     message += "z" + String(resetAileronTrim ? 1 : 0);                                                // "z" is used for reset aileron trim
     message += "y" + String(resetElevatorTrim ? 1 : 0);                                               // "y" is used for reset elevator trim
+    message += "b" + String(airbrakeEnabled ? 1 : 0);                                                 // "b" is used for airbrake
 
     sendingElevatorTrimMessage = 0;
     sendingAileronTrimMessage = 0;

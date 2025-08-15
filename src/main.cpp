@@ -38,7 +38,7 @@ void loop() {
     // You can do some work here
     // Don't do stuff if you are below your time budget.
 
-    readSlider();
+    sendingEngineMessage = max((int)analogRead(sliderPin), (int)map(ps5.R2Value(), 0, 255, 0, 4095));
 
     delay(remainingTimeBudget);
   }
@@ -55,10 +55,6 @@ void loop() {
 
   if (ps5.isConnected())
     loraLoop();
-}
-
-void readSlider() {
-  sendingEngineMessage = max((int)analogRead(sliderPin), (int)map(ps5.R2Value(), 0, 255, 0, 4095));
 }
 
 void setupSD() {
