@@ -1,4 +1,5 @@
 #include <esp_system.h>
+#include <stdlib.h>
 
 #include "ps5.h"
 #include "ps5_int.h"
@@ -14,13 +15,11 @@ enum ps5_packet_index {
   packet_index_analog_stick_ry = 14,
 
   packet_index_button_standard = 15,
-  packet_index_button_extra = 16,
+  packet_index_button_extra = 16,  // l1 r1 options share
   packet_index_button_ps = 17,
 
   packet_index_analog_l2 = 18,
-  packet_index_analog_r2 = 19,
-
-  packet_index_status = 42
+  packet_index_analog_r2 = 19
 };
 
 enum ps5_button_mask {
@@ -56,13 +55,6 @@ enum ps5_button_mask {
   button_mask_touchpad = 0b10
 };
 
-enum ps5_status_mask {
-  ps5_status_mask_battery = 0b00001111,
-  ps5_status_mask_charging = 0b00010000,
-  ps5_status_mask_audio = 0b00100000,
-  ps5_status_mask_mic = 0b01000000,
-};
-
 /********************************************************************************/
 /*              L O C A L    F U N C T I O N     P R O T O T Y P E S */
 /********************************************************************************/
@@ -94,8 +86,6 @@ void parsePacket(uint8_t* packet) {
   ps5.button = parsePacketButtons(packet);
   ps5.analog.stick = parsePacketAnalogStick(packet);
   ps5.analog.button = parsePacketAnalogButton(packet);
-  // ps5.sensor = parsePacketSensor(packet);
-  ps5.status = parsePacketStatus(packet);
   ps5.latestPacket = packet;
 
   ps5_event_t ps5Event = parseEvent(prev_ps5, ps5);
@@ -244,38 +234,4 @@ ps5_button_t parsePacketButtons(uint8_t* packet) {
   ps5_button.touchpad = (psBtnData & button_mask_touchpad) ? true : false;
 
   return ps5_button;
-}
-
-/*******************************/
-/*   S T A T U S   F L A G S   */
-/*******************************/
-ps5_status_t parsePacketStatus(uint8_t* packet) {
-  ps5_status_t ps5Status;
-
-  ps5Status.battery = packet[packet_index_status] & ps5_status_mask_battery;
-  ps5Status.charging = (packet[packet_index_status] & ps5_status_mask_charging) != 0 ? true : false;
-  ps5Status.audio = (packet[packet_index_status] & ps5_status_mask_audio) != 0 ? true : false;
-  ps5Status.mic = (packet[packet_index_status] & ps5_status_mask_mic) != 0 ? true : false;
-
-  return ps5Status;
-}
-
-/********************/
-/*   S E N S O R S  */
-/********************/
-ps5_sensor_t parsePacketSensor(uint8_t* packet) {
-  ps5_sensor_t ps5Sensor;
-  /*
-      const uint16_t offset = 0x200;
-
-      ps5Sensor.accelerometer.x = (packet[packet_index_sensor_accelerometer_x] << 8) +
-     packet[packet_index_sensor_accelerometer_x+1] - offset;
-      ps5Sensor.accelerometer.y = (packet[packet_index_sensor_accelerometer_y] << 8) +
-     packet[packet_index_sensor_accelerometer_y+1] - offset;
-      ps5Sensor.accelerometer.z = (packet[packet_index_sensor_accelerometer_z] << 8) +
-     packet[packet_index_sensor_accelerometer_z+1] - offset;
-      ps5Sensor.gyroscope.z     = (packet[packet_index_sensor_gyroscope_z]
-     << 8) + packet[packet_index_sensor_gyroscope_z+1]     - offset;
-  */
-  return ps5Sensor;
 }

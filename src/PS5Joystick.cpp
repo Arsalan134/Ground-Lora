@@ -19,6 +19,9 @@ void removePairedDevices() {
 
 void printDeviceAddress() {
   const uint8_t* point = esp_bt_dev_get_address();
+
+  Serial.print("This device MAC is: ");
+
   for (int i = 0; i < 6; i++) {
     char str[3];
     sprintf(str, "%02x", (int)point[i]);
@@ -27,23 +30,14 @@ void printDeviceAddress() {
       Serial.print(":");
     }
   }
+
+  Serial.println();
 }
 
 // 🎮
 void notify() {
   if (millis() - lastTimeStamp > 20) {
     lastTimeStamp = millis();
-
-    // if (PS4AccelerometerEnabled) {
-    //   transmitData[rollIndex] = map(constrain(PS4.getAngle(Roll), 90, 270), 270, 90, 0, 180);
-    // }
-
-    batteryPercentage = ps5.Battery();
-
-    if (ps5.Charging())
-      display.setOverlays(allOverlays, 3);
-    else
-      display.setOverlays(allOverlays, 2);
 
     if (ps5.Up())  // Up Button ⬆️
       sendingElevatorTrimMessage = 1;
@@ -154,7 +148,7 @@ void notify() {
 
 void onConnect() {
   Serial.println("Connected!");
-  display.setOverlays(allOverlays, 2);
+  display.setOverlays(allOverlays, 1);
 }
 
 void onDisconnect() {

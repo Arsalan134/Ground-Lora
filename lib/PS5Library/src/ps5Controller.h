@@ -72,11 +72,6 @@ class ps5Controller {
   int8_t RStickX() { return data.analog.stick.rx; }
   int8_t RStickY() { return data.analog.stick.ry; }
 
-  uint8_t Battery() { return data.status.battery; }
-  bool Charging() { return data.status.charging; }
-  bool Audio() { return data.status.audio; }
-  bool Mic() { return data.status.mic; }
-
  private:
   static void _event_callback(void* object, ps5_t data, ps5_event_t event);
   static void _connection_callback(void* object, uint8_t isConnected);

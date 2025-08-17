@@ -5,7 +5,7 @@
 #define sliderPin 34
 
 // PS5
-#define MAC_ADDRESS "ac:36:1b:41:ac:ed"
+#define PS5_MAC_ADDRESS "ac:36:1b:41:ac:ed"
 
 extern OLEDDisplayUi display;
 

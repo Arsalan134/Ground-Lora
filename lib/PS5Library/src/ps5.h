@@ -79,6 +79,8 @@ typedef struct {
 /********************/
 
 typedef struct {
+  int16_t x;
+  int16_t y;
   int16_t z;
 } ps5_sensor_gyroscope_t;
 
@@ -109,6 +111,7 @@ typedef struct {
   ps5_button_t button_down;
   ps5_button_t button_up;
   ps5_analog_t analog_move;
+  ps5_sensor_t sensor_move;  // Add sensor movement events
 } ps5_event_t;
 
 typedef struct {

@@ -106,7 +106,7 @@ void loraLoop() {
 
     LoRa_sendMessage(message);  // send a message
 
-    Serial.println("LoRa Send: " + message);
+    // Serial.println("LoRa Send: " + message);
 
     if (checksum == previousChecksum)
       samePacketCount++;

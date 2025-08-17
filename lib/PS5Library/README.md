@@ -40,4 +40,47 @@ void setup()
 
 **TLDR:** Connect ps5 controller with phone through bluetooth. Get the controller's bluetooth MAC address (look in About settings of phone). Replace '1a:2b:3c:01:01:01' with your controller's bluetooh MAC. Same can be done with your ps5 console if more convenient.
 ##
-**Note: Only buttons and analog inputs have been tested. Other functions like rumble/lights/IMU might not work, but could possibly be implemented using the 'ps5ViewIncomingBits.ino' example.**
+**Note: This library now supports full PS5 DualSense controller functionality including:**
+- ✅ **Buttons and analog inputs** - Fully tested and working
+- ✅ **IMU sensors (Accelerometer & Gyroscope)** - Now implemented and working
+- ⚠️ **Rumble/haptic feedback and lights** - Implemented but may need testing
+- ⚠️ **Touchpad** - Basic structure in place, needs implementation
+
+## Sensor Data Usage
+
+### Accelerometer
+The accelerometer measures linear acceleration in 3 axes (X, Y, Z). Values are 16-bit signed integers.
+- **Range**: Approximately ±4g (where 1g = 9.81 m/s²)
+- **Use cases**: Tilt detection, motion sensing, orientation
+
+```cpp
+int16_t accel_x = ps5.data.sensor.accelerometer.x;
+int16_t accel_y = ps5.data.sensor.accelerometer.y;
+int16_t accel_z = ps5.data.sensor.accelerometer.z;
+```
+
+### Gyroscope
+The gyroscope measures angular velocity in 3 axes (X, Y, Z). Values are 16-bit signed integers.
+- **Range**: Approximately ±2000 degrees per second
+- **Use cases**: Rotation detection, gesture recognition, stabilization
+
+```cpp
+int16_t gyro_x = ps5.data.sensor.gyroscope.x;
+int16_t gyro_y = ps5.data.sensor.gyroscope.y;
+int16_t gyro_z = ps5.data.sensor.gyroscope.z;
+```
+
+### Example Usage
+```cpp
+// Check for significant controller movement
+if (abs(ps5.data.sensor.accelerometer.x) > 8000) {
+    Serial.println("Controller tilted left/right");
+}
+
+// Check for rotation
+if (abs(ps5.data.sensor.gyroscope.z) > 5000) {
+    Serial.println("Controller spinning around Z-axis");
+}
+```
+
+See `examples/ps5_sensors_example.ino` for a complete working example.

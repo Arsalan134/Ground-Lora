@@ -130,9 +130,8 @@ void setupPS5() {
   ps5.attachOnConnect(onConnect);
   ps5.attachOnDisconnect(onDisconnect);
 
-  ps5.begin(MAC_ADDRESS);  // MAC addresss of Joystick
+  ps5.begin(PS5_MAC_ADDRESS);  // MAC addresss of Joystick
 
-  Serial.println("This device MAC is: ");
   printDeviceAddress();
 }
 

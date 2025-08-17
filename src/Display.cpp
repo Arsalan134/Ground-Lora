@@ -3,7 +3,7 @@
 #include "Header Files\PS5Joystick.h"
 
 // Overlays are statically drawn on top of a frame eg. a clock
-OverlayCallback allOverlays[] = {/*wifiOverlay,*/ batteryOverlay, bluetoothOverlay, chargingOverlay};
+OverlayCallback allOverlays[] = {/*wifiOverlay,*/ bluetoothOverlay, batteryOverlay, chargingOverlay};
 
 // draw an xbm image.
 // Please note that everything that should be transitioned
