@@ -5,7 +5,6 @@ unsigned long lastTimeStamp = 0;
 
 unsigned long lastFlapsChangeTimestamp = 0;
 
-bool PS4AccelerometerEnabled = false;
 uint8_t batteryPercentage = 0;
 
 void removePairedDevices() {
@@ -77,8 +76,7 @@ void notify() {
 
     // if (ps5.Share()) // Share Button 🔗
 
-    if (ps5.Options())  // Options Button ⚙️
-      PS4AccelerometerEnabled = !PS4AccelerometerEnabled;
+    // if (ps5.Options())  // Options Button ⚙️
 
     if (ps5.L3())  // L3 Button 🔘
       resetAileronTrim = true;
