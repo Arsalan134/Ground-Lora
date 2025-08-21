@@ -1,11 +1,129 @@
+# 🧪 Ground-Lora Test Suite
 
-This directory is intended for PlatformIO Test Runner and project tests.
+This directory contains comprehensive unit tests for the Ground-Lora project using PlatformIO Test Runner.
 
-Unit Testing is a software testing method by which individual units of
-source code, sets of one or more MCU program modules together with associated
-control data, usage procedures, and operating procedures, are tested to
-determine whether they are fit for use. Unit testing finds problems early
-in the development cycle.
+## 🎯 Test Structure
 
-More information about PlatformIO Unit Testing:
+### 📂 Test Categories
+
+#### 🛠️ **test_utilities/**
+- Basic Arduino utility functions (map, constrain, abs)
+- Timing and overflow handling
+- Mathematical operations validation
+
+#### 📡 **test_lora/**
+- LoRa communication protocol testing
+- Message construction and validation  
+- Checksum calculation verification
+- Control surface mapping tests
+- Engine throttle mapping validation
+
+#### 🎮 **test_ps5/**
+- PS5 controller input processing
+- Analog stick and trigger handling
+- Button mapping and emergency controls
+- Trim and flaps control logic
+- Battery level reporting
+
+#### 🖥️ **test_display/**
+- OLED display functionality  
+- Control surface value ranges
+- Battery and status display logic
+- Frame animation and coordinates
+- Emergency indicator testing
+
+#### 🛡️ **test_safety/**
+- Emergency stop systems
+- Control surface safety limits
+- Rate limiting and input validation
+- Connection loss safety protocols
+- Airbrake and trim reset safety
+
+#### 🔄 **test_integration/**
+- Complete system workflow testing
+- Subsystem communication validation
+- End-to-end control loop simulation
+- State consistency verification
+- Real-world scenario testing
+
+#### 🚀 **test_main/**
+- System initialization sequence
+- Main loop execution logic
+- Timing and performance validation
+- Resource management testing
+- Error handling scenarios
+
+## 🏃‍♂️ Running Tests
+
+### All Tests
+```bash
+pio test
+```
+
+### Specific Test Suite
+```bash
+pio test -f test_lora
+pio test -f test_ps5
+pio test -f test_safety
+```
+
+### With Verbose Output
+```bash
+pio test -v
+```
+
+## 📊 Test Coverage
+
+The test suite covers:
+- ✅ **Core Functionality**: All major system components
+- ✅ **Safety Systems**: Emergency stops, limits, validation  
+- ✅ **Communication**: LoRa protocol and PS5 integration
+- ✅ **Edge Cases**: Overflow, bounds checking, error handling
+- ✅ **Integration**: Complete system workflows
+- ✅ **Performance**: Timing and resource management
+
+## 🎯 Test Philosophy
+
+- **🔒 Safety First**: Comprehensive safety system testing
+- **📡 Protocol Validation**: Thorough communication testing
+- **🎮 User Experience**: Controller interaction validation  
+- **⚡ Performance**: Timing and efficiency verification
+- **🛡️ Robustness**: Edge case and error handling
+
+## 💡 Adding New Tests
+
+1. Create test file in appropriate category directory
+2. Include `<unity.h>` and required headers
+3. Implement `setUp()` and `tearDown()` functions
+4. Write test functions with `test_` prefix
+5. Use Unity assertions (TEST_ASSERT_*)
+6. Add tests to setup() with RUN_TEST()
+
+### Example Test Function
+```cpp
+void test_example_functionality() {
+    // Arrange
+    int input = 127;
+    
+    // Act  
+    int result = map(input, 0, 255, 0, 180);
+    
+    // Assert
+    TEST_ASSERT_EQUAL(90, result);
+}
+```
+
+## 📈 Test Results
+
+Tests validate:
+- 🎮 **Controller Integration**: Input processing and mapping
+- 📡 **Communication Protocol**: Message format and checksums
+- 🛡️ **Safety Systems**: Emergency stops and limits
+- 🖥️ **Display Logic**: Status and control feedback
+- ⚡ **System Performance**: Timing and resource usage
+- 🔄 **Complete Workflows**: End-to-end functionality
+
+---
+
+For more information about PlatformIO Unit Testing:
 - https://docs.platformio.org/en/latest/advanced/unit-testing/index.html
