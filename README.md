@@ -1,4 +1,9 @@
 # 📡 Ground-Lora
+
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![PlatformIO](https://img.shields.io/badge/PlatformIO-ESP32-orange?style=for-the-badge)](https://platformio.org/)
+[![Arduino](https://img.shields.io/badge/Framework-Arduino-blue?style=for-the-badge)](https://arduino.cc/)
+
 🎮 **ESP32-based LoRa Ground Control Station with PS5 Controller**
 
 A sophisticated ground control station for remote aircraft control using LoRa communication and PS5 DualSense controller input. This project provides real-time flight control with OLED display feedback and robust wireless communication.
@@ -229,7 +234,14 @@ pio device monitor
 
 ## 📄 License
 
-This project is open source. Please check the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+**MIT License Summary:**
+- ✅ Commercial use allowed
+- ✅ Modification allowed  
+- ✅ Distribution allowed
+- ✅ Private use allowed
+- ⚖️ Liability and warranty disclaimed
 
 ## 👨‍💻 Author
 
