@@ -174,40 +174,77 @@ e[engine]a[aileron]r[rudder]l[elevator]t[trim]i[aileron_trim]f[flaps]z[reset_a]y
 ## 📁 Project Structure
 
 ```
-Ground-Lora/
-├── 📄 platformio.ini                    # 🔧 Build configuration with dual-core flags
-├── � README.md                         # 📚 This file
-├── 📄 README_DUAL_CORE.md               # 🏗️ Dual-core implementation details
-├── 📄 WATCHDOG_TIMEOUT_FIX.md           # 🛡️ Watchdog timeout troubleshooting
-├── 📄 DUAL_CORE_IMPLEMENTATION_SUMMARY.md # ✅ Implementation summary
-├── �📂 src/
-│   ├── 📄 main.cpp                      # 🚀 Main program with dual-core tasks
-│   ├── 📄 PS5Joystick.cpp              # 🎮 Controller handling (no mutex)
+Ground Lora/
+├── 📄 LICENSE                          # 📝 MIT License file
+├── 📄 platformio.ini                   # 🔧 Build configuration with dual-core flags
+├── 📄 README.md                        # 📚 This file
+├── � include/                         # 📂 Header files directory
+│   ├── 📄 common.h                     # � Shared definitions and pin config
+│   ├── 📄 Display.h                    # 🖥️ Display interface
+│   ├── 📄 images.h                     # �️ Display graphics and icons
+│   ├── 📄 main.h                       # 🚀 Main function declarations
+│   ├── 📄 PS5Joystick.h               # 🎮 Controller interface
+│   └── 📄 SD-Card.h                   # 💾 SD card interface
+├── 📂 src/                            # 📂 Source code directory
+│   ├── 📄 main.cpp                     # 🚀 Main program with dual-core tasks
 │   ├── 📄 Display.cpp                  # 🖥️ OLED display management
 │   ├── 📄 Lora.cpp                     # 📡 LoRa communication
-│   ├── 📄 SD-Card.cpp                  # 💾 SD card (unused)
-│   ├── 📂 Common/
-│   │   └── 📄 common.h                 # 📌 Shared definitions and pin config
-│   ├── � Header Files/
-│   │   ├── �📄 main.h                   # 🚀 Main function declarations
-│   │   ├── 📄 Display.h                # 🖥️ Display interface
-│   │   ├── 📄 images.h                 # 🖼️ Display graphics and icons
-│   │   ├── 📄 PS5Joystick.h            # 🎮 Controller interface
-│   │   └── � SD-Card.h                # 💾 SD card interface
-│   └── �📂 Resources/
-│       ├── 📄 blIcon.png               # 🔵 Bluetooth icon
-│       ├── 📄 charging.png             # ⚡ Charging icon
-│       ├── 📄 ps5 icon.png             # 🎮 PS5 controller icon
-│       ├── 📄 PS5-Controller-PNG-Image.png # 🎮 Controller image
-│       └── 📄 wifiIcon.png             # 📶 WiFi icon
-├── 📂 lib/
-│   └── 📂 PS5Library/                  # 🎮 PS5 controller library
+│   ├── 📄 PS5Joystick.cpp             # 🎮 Controller handling (no mutex)
+│   └── 📄 SD-Card.cpp                 # 💾 SD card functionality
+├── 📂 lib/                            # 📂 Libraries directory
+│   └── 📂 PS5Library/                 # 🎮 PS5 controller library
+│       ├── 📄 component.mk             # 📋 Component makefile
+│       ├── 📄 Kconfig                  # ⚙️ Configuration file
+│       ├── 📄 keywords.txt             # 🔤 Arduino IDE keywords
+│       ├── 📄 library.properties       # 📚 Library properties
+│       ├── 📄 PACKET_ANALYSIS.md       # 📡 Packet analysis documentation
 │       ├── 📄 README.md                # � Library documentation
-│       ├── 📄 SENSOR_IMPLEMENTATION.md # 📊 Sensor details
-│       ├── 📄 PACKET_ANALYSIS.md       # 📡 Packet analysis
-│       ├── � src/                     # � Library source code
-│       └── 📂 examples/                # 📝 Example implementations
-└── 📂 test/                            # 🧪 Unit tests
+│       ├── 📄 SENSOR_IMPLEMENTATION.md # 📊 Sensor implementation details
+│       ├── 📂 examples/                # 📝 Example implementations
+│       │   ├── 📄 ps5_advanced_sensors.ino # 🧪 Advanced sensors example
+│       │   ├── 📄 ps5_packet_debug.ino     # 🔍 Packet debugging example
+│       │   └── 📄 ps5_sensors_example.ino  # � Basic sensors example
+│       └── 📂 src/                     # 📂 Library source code
+│           ├── 📄 ps5_int.h            # 🔗 Internal PS5 definitions
+│           ├── 📄 ps5_l2cap.c          # 📡 L2CAP protocol implementation
+│           ├── 📄 ps5_parser.c         # � Data parser implementation
+│           ├── 📄 ps5_spp.c            # 📶 SPP protocol implementation
+│           ├── 📄 ps5.c                # 🎮 Core PS5 functionality
+│           ├── 📄 ps5.h                # 🎮 PS5 header file
+│           ├── 📄 ps5Controller.cpp    # 🎮 Controller class implementation
+│           ├── 📄 ps5Controller.h      # 🎮 Controller class header
+│           ├── 📂 osi/                 # 📂 OS interface
+│           │   └── 📄 allocator.h      # 💾 Memory allocator
+│           └── 📂 stack/               # � Bluetooth stack
+│               ├── 📄 bt_types.h       # 🔵 Bluetooth type definitions
+│               ├── 📄 btm_api.h        # 🔵 BTM API definitions
+│               ├── 📄 gap_api.h        # 🔵 GAP API definitions
+│               ├── 📄 hcidefs.h        # 🔵 HCI definitions
+│               ├── 📄 l2c_api.h        # 🔵 L2C API definitions
+│               └── � l2cdefs.h        # 🔵 L2C definitions
+├── �📂 Resources/                       # 📂 Resource files directory
+│   ├── 📄 blIcon.png                   # 🔵 Bluetooth icon
+│   ├── 📄 charging.png                 # ⚡ Charging indicator icon
+│   ├── 📄 ps5 icon.png                 # 🎮 PS5 controller icon
+│   ├── 📄 PS5-Controller-PNG-Image.png # 🎮 Controller image
+│   └── 📄 wifiIcon.png                 # 📶 WiFi status icon
+└── 📂 test/                           # 📂 Unit tests directory
+    ├── 📄 README                       # 📚 Test documentation
+    ├── 📄 test_config.py              # ⚙️ Test configuration file
+    ├── 📂 test_display/                # 🖥️ Display tests
+    │   └── 📄 test_display.cpp         # 🧪 Display unit tests
+    ├── 📂 test_integration/            # 🔗 Integration tests
+    │   └── 📄 test_integration.cpp     # 🧪 Integration unit tests
+    ├── 📂 test_lora/                   # 📡 LoRa tests
+    │   └── 📄 test_lora.cpp            # 🧪 LoRa unit tests
+    ├── 📂 test_main/                   # 🚀 Main tests
+    │   └── 📄 test_main.cpp            # 🧪 Main functionality tests
+    ├── 📂 test_ps5/                    # 🎮 PS5 controller tests
+    │   └── � test_ps5.cpp             # 🧪 PS5 controller unit tests
+    ├── 📂 test_safety/                 # �️ Safety system tests
+    │   └── 📄 test_safety.cpp          # 🧪 Safety feature tests
+    └── 📂 test_utilities/              # 🔧 Utility tests
+        └── 📄 test_utilities.cpp       # 🧪 Utility function tests
 ```
 
 ### 📋 Key Files Description
@@ -220,20 +257,34 @@ Ground-Lora/
 #### 🎮 **Controller Integration**
 - **`PS5Joystick.cpp/.h`**: PS5 controller handling with optimized callback functions
 - **`PS5Library/`**: Complete PS5 DualSense library with advanced features
+  - **`ps5Controller.cpp/.h`**: Main controller class implementation
+  - **`ps5.c/.h`**: Core PS5 functionality and protocol handling
+  - **`examples/`**: Sample implementations for various PS5 features
 
-#### �️ **Display System**
+#### 🖥️ **Display System**
 - **`Display.cpp/.h`**: OLED display management with frame-based UI
 - **`images.h`**: Graphics definitions for icons and symbols
-- **`Resources/`**: Icon and image assets for the display
+- **`Resources/`**: Icon and image assets for the display interface
 
 #### 📡 **Communication**
 - **`Lora.cpp`**: LoRa communication with packet protocol and checksums
-- **`SD-Card.cpp/.h`**: SD card functionality (currently unused)
+- **`SD-Card.cpp/.h`**: SD card functionality for data logging
 
-#### 📚 **Documentation**
-- **`README_DUAL_CORE.md`**: Comprehensive dual-core architecture documentation
-- **`WATCHDOG_TIMEOUT_FIX.md`**: Troubleshooting guide for system stability
-- **`DUAL_CORE_IMPLEMENTATION_SUMMARY.md`**: Implementation status and performance metrics
+#### 🧪 **Testing Framework**
+- **`test/`**: Comprehensive unit testing suite
+  - **`test_config.py`**: Python configuration for test automation
+  - **`test_display/`**: Display functionality tests
+  - **`test_integration/`**: System integration tests
+  - **`test_lora/`**: LoRa communication tests
+  - **`test_main/`**: Core functionality tests
+  - **`test_ps5/`**: PS5 controller tests
+  - **`test_safety/`**: Safety system validation tests
+  - **`test_utilities/`**: Utility function tests
+
+#### 📚 **Project Configuration**
+- **`platformio.ini`**: Build configuration with dual-core optimization flags
+- **`LICENSE`**: MIT License file
+- **`README.md`**: This comprehensive documentation
 
 ## 🔧 Development Setup
 
