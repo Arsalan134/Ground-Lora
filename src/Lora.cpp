@@ -70,34 +70,33 @@ byte simple_checksum(const byte* data, size_t len) {
   return sum;
 }
 
+void constructMessage() {
+  message = "e" + String(isEmergencyStopEnabled ? 0 : map(sendingEngineMessage, 0, 4095, 0, 180));  // 🚀 "e" is used for engine
+  message += "a" + String(map(sendingAileronMessage, 0, 255, 0, 180));                              // ↔️ "a" is used for ailerons
+  message += "r" + String(map(sendingRudderMessage, 0, 255, 0, 180));                               // ↔️ "r" is used for rudder
+  message += "l" + String(map(sendingElevatorsMessage, 0, 255, 0, 180));                            // ↕️ "l" is used for elevators
+  message += "t" + String(sendingElevatorTrimMessage);                                              // ⚖️ "t" is used for trim
+  message += "i" + String(sendingAileronTrimMessage);                                               // ⚖️ "i" is used for aileron trim
+  message += "f" + String(sendingFlapsMessage);                                                     // 🪶 "f" is used for flaps
+  message += "z" + String(resetAileronTrim ? 1 : 0);                                                // 🔄 "z" is used for reset aileron trim
+  message += "y" + String(resetElevatorTrim ? 1 : 0);  // 🔄 "y" is used for reset elevator trim
+  message += "b" + String(airbrakeEnabled ? 1 : 0);    // 🛑 "b" is used for airbrake
+}
+
 void loraLoop() {
-  if (runEvery(60)) {                                                                                 // 📡 Send every 60ms
-    message = "e" + String(isEmergencyStopEnabled ? 0 : map(sendingEngineMessage, 0, 4095, 0, 180));  // 🚀 "e" is used for engine
-    message += "a" + String(map(sendingAileronMessage, 0, 255, 0, 180));                              // ↔️ "a" is used for ailerons
-    message += "r" + String(map(sendingRudderMessage, 0, 255, 0, 180));                               // ↔️ "r" is used for rudder
-    message += "l" + String(map(sendingElevatorsMessage, 0, 255, 0, 180));                            // ↕️ "l" is used for elevators
-    message += "t" + String(sendingElevatorTrimMessage);                                              // ⚖️ "t" is used for trim
-    message += "i" + String(sendingAileronTrimMessage);                                               // ⚖️ "i" is used for aileron trim
-    message += "f" + String(sendingFlapsMessage);                                                     // 🪶 "f" is used for flaps
-    message += "z" + String(resetAileronTrim ? 1 : 0);   // 🔄 "z" is used for reset aileron trim
-    message += "y" + String(resetElevatorTrim ? 1 : 0);  // 🔄 "y" is used for reset elevator trim
-    message += "b" + String(airbrakeEnabled ? 1 : 0);    // 🛑 "b" is used for airbrake
-
-    sendingElevatorTrimMessage = 0;  // 🔄 Reset trim messages
-    sendingAileronTrimMessage = 0;   // 🔄 Reset trim messages
-    resetAileronTrim = false;
-    resetElevatorTrim = false;
-
-    byte checksum = simple_checksum((const byte*)message.c_str(), message.length());  // 🔐 Calculate checksum
-
-    message += "#";       // 📌 Message delimiter
-    message += checksum;  // 🔐 Add checksum
+  if (runEvery(60)) {  // 📡 Send every 60ms
+    constructMessage();
 
     int aileronDeviation = abs(sendingAileronMessage - 127);      // ↔️ Aileron deviation from center
     int rudderDeviation = abs(sendingRudderMessage - 127);        // ↔️ Rudder deviation from center
     int elevatorsDeviation = abs(sendingElevatorsMessage - 127);  // ↕️ Elevator deviation from center
-
     int totalDeviation = aileronDeviation + rudderDeviation + elevatorsDeviation;
+
+    byte checksum = simple_checksum((const byte*)message.c_str(), message.length());  // 🔐 Calculate checksum
+
+    // Add message delimiter and checksum
+    message += "#";       // 📌 Message delimiter
+    message += checksum;  // 🔐 Add checksum
 
     // Skip sending if the same packet is sent multiple times 📦
     if (checksum == previousChecksum && samePacketCount >= 10 &&
@@ -115,5 +114,11 @@ void loraLoop() {
       samePacketCount = 0;  // 🔄 Reset duplicate count
 
     previousChecksum = checksum;  // 💾 Store for comparison
+
+    // Reset messages
+    sendingElevatorTrimMessage = 0;  // 🔄 Reset trim messages
+    sendingAileronTrimMessage = 0;   // 🔄 Reset trim messages
+    resetAileronTrim = false;
+    resetElevatorTrim = false;
   }
 }
