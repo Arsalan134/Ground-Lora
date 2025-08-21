@@ -1,37 +1,38 @@
 #include <LoRa.h>
 #include "common.h"
 
+// 📡 LoRa Communication Variables
 int sendingEngineMessage = 1;
-byte sendingAileronMessage = 127;
-byte sendingRudderMessage = 127;
-byte sendingElevatorsMessage = 127;
+byte sendingAileronMessage = 127;    // ↔️ Aileron control
+byte sendingRudderMessage = 127;     // ↔️ Rudder control
+byte sendingElevatorsMessage = 127;  // ↕️ Elevator control
 int sendingElevatorTrimMessage = 0;
 int sendingAileronTrimMessage = 0;
-int sendingFlapsMessage = 0;  // 0, 1, 2, 3, 4
+int sendingFlapsMessage = 0;  // 🪶 Flaps: 0, 1, 2, 3, 4
 bool resetAileronTrim = false;
 bool resetElevatorTrim = false;
-bool airbrakeEnabled = false;
+bool airbrakeEnabled = false;  // 🛑 Airbrake status
 
 void LoRa_rxMode() {
-  LoRa.enableInvertIQ();  // active invert I and Q signals
-  LoRa.receive();         // set receive mode
+  LoRa.enableInvertIQ();  // 🔄 active invert I and Q signals
+  LoRa.receive();         // 📥 set receive mode
 }
 
 void LoRa_txMode() {
-  LoRa.idle();             // set standby mode
-  LoRa.disableInvertIQ();  // normal mode
+  LoRa.idle();             // ⏸️ set standby mode
+  LoRa.disableInvertIQ();  // ⚡ normal mode
 }
 
 void LoRa_sendMessage(String message) {
-  digitalWrite(BUILTIN_LED, 1);
+  digitalWrite(BUILTIN_LED, 1);  // 💡 Turn on LED during transmission
   // LoRa_txMode();         // set tx mode
-  LoRa.beginPacket();    // start packet
-  LoRa.print(message);   // add payload
-  LoRa.endPacket(true);  // finish packet and send it
+  LoRa.beginPacket();    // 📦 start packet
+  LoRa.print(message);   // 📝 add payload
+  LoRa.endPacket(true);  // 🚀 finish packet and send it
 }
 
 void onReceive(int packetSize) {
-  String message = "";
+  String message = "";  // 📥 Received message buffer
 
   while (LoRa.available()) {
     message += (char)LoRa.read();
@@ -39,8 +40,8 @@ void onReceive(int packetSize) {
 }
 
 void onTxDone() {
-  // Serial.println("TxDone");
-  digitalWrite(BUILTIN_LED, 0);
+  // Serial.println("📡 TxDone");
+  digitalWrite(BUILTIN_LED, 0);  // 💡 Turn off LED after transmission
   // LoRa_rxMode();
 }
 
@@ -50,10 +51,10 @@ boolean runEvery(unsigned long interval) {
 
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
-    return true;
+    return true;  // ⏰ Time to execute
   }
 
-  return false;
+  return false;  // ⏳ Wait more
 }
 
 String message = "";
@@ -62,7 +63,7 @@ byte previousChecksum = 0;
 int samePacketCount = 0;
 
 byte simple_checksum(const byte* data, size_t len) {
-  byte sum = 0;
+  byte sum = 0;  // 🧮 Checksum calculation
   for (size_t i = 0; i < len; i++) {
     sum ^= data[i];
   }
@@ -70,49 +71,49 @@ byte simple_checksum(const byte* data, size_t len) {
 }
 
 void loraLoop() {
-  if (runEvery(60)) {
-    message = "e" + String(isEmergencyStopEnabled ? 0 : map(sendingEngineMessage, 0, 4095, 0, 180));  // "e" is used for engine
-    message += "a" + String(map(sendingAileronMessage, 0, 255, 0, 180));                              // "a" is used for ailerons
-    message += "r" + String(map(sendingRudderMessage, 0, 255, 0, 180));                               // "r" is used for rudder
-    message += "l" + String(map(sendingElevatorsMessage, 0, 255, 0, 180));                            // "l" is used for elevators
-    message += "t" + String(sendingElevatorTrimMessage);                                              // "t" is used for trim
-    message += "i" + String(sendingAileronTrimMessage);                                               // "i" is used for aileron trim
-    message += "f" + String(sendingFlapsMessage);                                                     // "f" is used for flaps
-    message += "z" + String(resetAileronTrim ? 1 : 0);                                                // "z" is used for reset aileron trim
-    message += "y" + String(resetElevatorTrim ? 1 : 0);                                               // "y" is used for reset elevator trim
-    message += "b" + String(airbrakeEnabled ? 1 : 0);                                                 // "b" is used for airbrake
+  if (runEvery(60)) {                                                                                 // 📡 Send every 60ms
+    message = "e" + String(isEmergencyStopEnabled ? 0 : map(sendingEngineMessage, 0, 4095, 0, 180));  // 🚀 "e" is used for engine
+    message += "a" + String(map(sendingAileronMessage, 0, 255, 0, 180));                              // ↔️ "a" is used for ailerons
+    message += "r" + String(map(sendingRudderMessage, 0, 255, 0, 180));                               // ↔️ "r" is used for rudder
+    message += "l" + String(map(sendingElevatorsMessage, 0, 255, 0, 180));                            // ↕️ "l" is used for elevators
+    message += "t" + String(sendingElevatorTrimMessage);                                              // ⚖️ "t" is used for trim
+    message += "i" + String(sendingAileronTrimMessage);                                               // ⚖️ "i" is used for aileron trim
+    message += "f" + String(sendingFlapsMessage);                                                     // 🪶 "f" is used for flaps
+    message += "z" + String(resetAileronTrim ? 1 : 0);   // 🔄 "z" is used for reset aileron trim
+    message += "y" + String(resetElevatorTrim ? 1 : 0);  // 🔄 "y" is used for reset elevator trim
+    message += "b" + String(airbrakeEnabled ? 1 : 0);    // 🛑 "b" is used for airbrake
 
-    sendingElevatorTrimMessage = 0;
-    sendingAileronTrimMessage = 0;
+    sendingElevatorTrimMessage = 0;  // 🔄 Reset trim messages
+    sendingAileronTrimMessage = 0;   // 🔄 Reset trim messages
     resetAileronTrim = false;
     resetElevatorTrim = false;
 
-    byte checksum = simple_checksum((const byte*)message.c_str(), message.length());
+    byte checksum = simple_checksum((const byte*)message.c_str(), message.length());  // 🔐 Calculate checksum
 
-    message += "#";
-    message += checksum;
+    message += "#";       // 📌 Message delimiter
+    message += checksum;  // 🔐 Add checksum
 
-    int aileronDeviation = abs(sendingAileronMessage - 127);
-    int rudderDeviation = abs(sendingRudderMessage - 127);
-    int elevatorsDeviation = abs(sendingElevatorsMessage - 127);
+    int aileronDeviation = abs(sendingAileronMessage - 127);      // ↔️ Aileron deviation from center
+    int rudderDeviation = abs(sendingRudderMessage - 127);        // ↔️ Rudder deviation from center
+    int elevatorsDeviation = abs(sendingElevatorsMessage - 127);  // ↕️ Elevator deviation from center
 
     int totalDeviation = aileronDeviation + rudderDeviation + elevatorsDeviation;
 
-    // Skip sending if the same packet is sent multiple times
+    // Skip sending if the same packet is sent multiple times 📦
     if (checksum == previousChecksum && samePacketCount >= 10 &&
-        totalDeviation < idleDeviationThreshold) {  // only if joysticks are in neutral position
+        totalDeviation < idleDeviationThreshold) {  // only if joysticks are in neutral position 🕹️
       return;
     }
 
-    LoRa_sendMessage(message);  // send a message
+    LoRa_sendMessage(message);  // 📡 send a message
 
-    // Serial.println("LoRa Send: " + message);
+    // Serial.println("📡 LoRa Send: " + message);
 
     if (checksum == previousChecksum)
-      samePacketCount++;
+      samePacketCount++;  // 📈 Increment duplicate count
     else
-      samePacketCount = 0;
+      samePacketCount = 0;  // 🔄 Reset duplicate count
 
-    previousChecksum = checksum;
+    previousChecksum = checksum;  // 💾 Store for comparison
   }
 }

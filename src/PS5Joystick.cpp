@@ -19,7 +19,7 @@ void removePairedDevices() {
 void printDeviceAddress() {
   const uint8_t* point = esp_bt_dev_get_address();
 
-  Serial.print("This device MAC is: ");
+  Serial.print("📱 This device MAC is: ");
 
   for (int i = 0; i < 6; i++) {
     char str[3];
@@ -54,23 +54,23 @@ void notify() {
 
     if (ps5.Cross()) {  // Cross Button ❌
       digitalWrite(BUILTIN_LED, 1);
-      isEmergencyStopEnabled = false;
-      airbrakeEnabled = false;
+      isEmergencyStopEnabled = false;  // 🔓 Disable emergency stop
+      airbrakeEnabled = false;         // 🚀 Disable airbrake
     } else
       digitalWrite(BUILTIN_LED, 0);
 
-    if (ps5.Circle())  // Circle Button ⭕
-      isEmergencyStopEnabled = true;
+    if (ps5.Circle())                 // Circle Button ⭕
+      isEmergencyStopEnabled = true;  // 🚨 Enable emergency stop
 
     // if (ps5.Triangle()) // Triangle Button 🔺
 
     if (ps5.L1() && millis() - lastFlapsChangeTimestamp > 200) {
-      sendingFlapsMessage = constrain(sendingFlapsMessage - 1, 0, 4);
+      sendingFlapsMessage = constrain(sendingFlapsMessage - 1, 0, 4);  // ⬇️ Decrease flaps
       lastFlapsChangeTimestamp = millis();
     }
 
     if (ps5.R1() && millis() - lastFlapsChangeTimestamp > 200) {
-      sendingFlapsMessage = constrain(sendingFlapsMessage + 1, 0, 4);
+      sendingFlapsMessage = constrain(sendingFlapsMessage + 1, 0, 4);  // ⬆️ Increase flaps
       lastFlapsChangeTimestamp = millis();
     }
 
@@ -78,21 +78,21 @@ void notify() {
 
     // if (ps5.Options())  // Options Button ⚙️
 
-    if (ps5.L3())  // L3 Button 🔘
-      resetAileronTrim = true;
+    if (ps5.L3())               // L3 Button 🔘
+      resetAileronTrim = true;  // 🔄 Reset aileron trim
 
-    if (ps5.R3())  // R3 Button 🔘
-      resetElevatorTrim = true;
+    if (ps5.R3())                // R3 Button 🔘
+      resetElevatorTrim = true;  // 🔄 Reset elevator trim
 
-    if (ps5.PSButton())  // PS Button ⏹️
-      airbrakeEnabled = true;
+    if (ps5.PSButton())        // PS Button ⏹️
+      airbrakeEnabled = true;  // 🛑 Enable airbrake
 
     // if (ps5.Touchpad()) // Touch Pad Button 🖱️
 
-    // 🕹️
-    sendingAileronMessage = ps5.LStickX() + 128;
-    sendingRudderMessage = ps5.RStickX() + 128;
-    sendingElevatorsMessage = ps5.RStickY() + 128;
+    // 🕹️ Joystick inputs
+    sendingAileronMessage = ps5.LStickX() + 128;    // ↔️ Aileron
+    sendingRudderMessage = ps5.RStickX() + 128;     // ↔️ Rudder
+    sendingElevatorsMessage = ps5.RStickY() + 128;  // ↕️ Elevators
 
 #if EVENTS
     boolean sqd = ps5.event.button_down.square, squ = ps5.event.button_up.square, trd = ps5.event.button_down.triangle,
@@ -100,16 +100,16 @@ void notify() {
     // crossD = ps5.event.button_down.cross, crossU = ps5.event.button_up.cross;
 
     // if (sqd)
-    //   Serial.println("SQUARE down");
+    //   Serial.println("🟨 SQUARE down");
     // else if (squ)
-    //   Serial.println("SQUARE up");
+    //   Serial.println("🟨 SQUARE up");
     // else if (trd)
-    //   Serial.println("TRIANGLE down");
+    //   Serial.println("🔺 TRIANGLE down");
     // else if (tru)
-    //   Serial.println("TRIANGLE up");
+    //   Serial.println("🔺 TRIANGLE up");
 
     // if (crossD) {
-    //   Serial.println("Cross Button ❌");
+    //   Serial.println("❌ Cross Button");
     //   digitalWrite(BUILTIN_LED, 1);
     // } else if (crossU)
     //   digitalWrite(BUILTIN_LED, 0);
@@ -119,9 +119,9 @@ void notify() {
 #if BUTTONS
     boolean sq = ps5.Square(), tr = ps5.Triangle();
     if (sq)
-      Serial.print("SQUARE pressed");
+      Serial.print("🟨 SQUARE pressed");
     if (tr)
-      Serial.print("TRIANGLE pressed");
+      Serial.print("🔺 TRIANGLE pressed");
     if (sq | tr)
       Serial.println();
 #endif
@@ -145,10 +145,10 @@ void notify() {
 }
 
 void onConnect() {
-  Serial.println("Connected!");
+  Serial.println("✅ Connected!");
   display.setOverlays(allOverlays, 1);
 }
 
 void onDisconnect() {
-  Serial.println("Disconnected!");
+  Serial.println("❌ Disconnected!");
 }

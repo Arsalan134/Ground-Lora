@@ -1,37 +1,37 @@
 #include <Arduino.h>
 #include "common.h"
 
-// PS5
+// PS5 Controller 🎮
 #include <ps5Controller.h>
-void setupPS5();
-void onConnect();
-void notify();
-void onDisconnect();
-void removePairedDevices();
-void printDeviceAddress();
+void setupPS5();             // 🎮 Initialize PS5 controller
+void onConnect();            // ✅ PS5 connect callback
+void notify();               // 📡 PS5 input handler
+void onDisconnect();         // ❌ PS5 disconnect callback
+void removePairedDevices();  // 🧹 Clear Bluetooth pairings
+void printDeviceAddress();   // 📱 Print device MAC
 
-// SD Card
+// SD Card 💾
 #include "SD-Card.h"
-void setupSD();
+void setupSD();  // 💾 Initialize SD card (currently disabled)
 
-// Display
+// Display 🖥️
 #include "Display.h"
-int frameCount = 1;
-int overlaysCount = 1;
-void setupDisplay();
+int frameCount = 1;     // 🖼️ Number of display frames
+int overlaysCount = 1;  // 📱 Number of display overlays
+void setupDisplay();    // 🖥️ Initialize OLED display
 
-// Lora
+// LoRa Communication 📡
 #include <LoRa.h>
-const long frequency = 915E6;  // LoRa Frequency
-boolean runEvery(unsigned long interval);
-void setupRadio();
-void loraLoop();
-uint8_t simple_checksum(const uint8_t* data, size_t len);
-void LoRa_rxMode();
-void LoRa_txMode();
-void LoRa_sendMessage(String message);
-void onReceive(int packetSize);
-void onTxDone();
+const long frequency = 915E6;                              // 📡 LoRa Frequency (915MHz)
+boolean runEvery(unsigned long interval);                  // ⏰ Timer function
+void setupRadio();                                         // 📡 Initialize LoRa radio
+void loraLoop();                                           // 📡 Main LoRa communication loop
+uint8_t simple_checksum(const uint8_t* data, size_t len);  // 🔐 Checksum calculator
+void LoRa_rxMode();                                        // 📥 Set LoRa receive mode
+void LoRa_txMode();                                        // 📤 Set LoRa transmit mode
+void LoRa_sendMessage(String message);                     // 📡 Send LoRa message
+void onReceive(int packetSize);                            // 📥 LoRa receive callback
+void onTxDone();                                           // ✅ LoRa transmit complete callback
 
 // void testdrawline();       // Draw many lines
 // void testdrawrect();       // Draw rectangles (outlines)

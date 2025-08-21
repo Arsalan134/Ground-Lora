@@ -1,29 +1,30 @@
 #include "OLEDDisplayUi.h"
 #include "SSD1306Wire.h"
 
-// pins
+// pins 📌
 #define sliderPin 34
 
-// PS5
+// PS5 Controller 🎮
 #define PS5_MAC_ADDRESS "ac:36:1b:41:ac:ed"
 
-extern OLEDDisplayUi display;
+extern OLEDDisplayUi display;  // 🖥️ Display UI
 
-extern OverlayCallback allOverlays[];
+extern OverlayCallback allOverlays[];  // 📱 Display overlays
 
-extern int sendingEngineMessage;
-extern byte sendingAileronMessage;
-extern byte sendingRudderMessage;
-extern byte sendingElevatorsMessage;
-extern int sendingElevatorTrimMessage;
-extern int sendingAileronTrimMessage;
-extern int sendingFlapsMessage;
-extern bool resetAileronTrim;
-extern bool resetElevatorTrim;
+// 🎮 Controller input variables
+extern int sendingEngineMessage;        // 🚀 Engine throttle
+extern byte sendingAileronMessage;      // ↔️ Aileron control
+extern byte sendingRudderMessage;       // ↔️ Rudder control
+extern byte sendingElevatorsMessage;    // ↕️ Elevator control
+extern int sendingElevatorTrimMessage;  // ⚖️ Elevator trim
+extern int sendingAileronTrimMessage;   // ⚖️ Aileron trim
+extern int sendingFlapsMessage;         // 🪶 Flaps position
+extern bool resetAileronTrim;           // 🔄 Reset aileron trim
+extern bool resetElevatorTrim;          // 🔄 Reset elevator trim
 
-extern bool isEmergencyStopEnabled;
-extern bool airbrakeEnabled;
+extern bool isEmergencyStopEnabled;  // 🚨 Emergency stop status
+extern bool airbrakeEnabled;         // 🛑 Airbrake status
 
-extern uint8_t batteryPercentage;
+extern uint8_t batteryPercentage;  // 🔋 Battery level
 
-#define idleDeviationThreshold 10
+#define idleDeviationThreshold 10  // 🎚️ Joystick idle threshold
