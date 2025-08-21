@@ -116,6 +116,7 @@ void loraLoop() {
     previousChecksum = checksum;  // 💾 Store for comparison
 
     // Reset messages
+    message = "";                    // Clear message buffer
     sendingElevatorTrimMessage = 0;  // 🔄 Reset trim messages
     sendingAileronTrimMessage = 0;   // 🔄 Reset trim messages
     resetAileronTrim = false;
