@@ -1,5 +1,5 @@
-#include "Header Files\PS5Joystick.h"
-#include "Common\common.h"
+#include "PS5Joystick.h"
+#include "common.h"
 
 unsigned long lastTimeStamp = 0;
 

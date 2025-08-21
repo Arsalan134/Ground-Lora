@@ -1,6 +1,6 @@
-#include "Header Files\Display.h"
-#include "Common\common.h"
-#include "Header Files\PS5Joystick.h"
+#include "Display.h"
+#include "PS5Joystick.h"
+#include "common.h"
 
 // Overlays are statically drawn on top of a frame eg. a clock
 OverlayCallback allOverlays[] = {/*wifiOverlay,*/ bluetoothOverlay, batteryOverlay, chargingOverlay};

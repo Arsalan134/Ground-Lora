@@ -1,5 +1,5 @@
 #include <LoRa.h>
-#include "Common\common.h"
+#include "common.h"
 
 int sendingEngineMessage = 1;
 byte sendingAileronMessage = 127;
