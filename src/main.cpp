@@ -43,7 +43,7 @@ void loop() {
 
   if (!setToZeroEngineSlider && sendingEngineMessage) {
     // For safety measures, if engine value is non zero, return 🚨
-    Serial.println("⚠️ Engine value is non zero, returning.");
+    Serial.println("⚠️  Engine value is non zero, returning.");
     delay(100);
     return;
   }
