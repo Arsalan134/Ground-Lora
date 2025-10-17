@@ -113,6 +113,8 @@ void setupRadio() {
   Serial.println("📥 Rx: invertIQ enable");
   Serial.println();
 
+  LoRa.setTxPower(20, PA_OUTPUT_PA_BOOST_PIN);  // 📡 Max power
+
   LoRa.onReceive(onReceive);
   LoRa.onTxDone(onTxDone);
   LoRa_txMode();

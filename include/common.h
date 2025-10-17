@@ -28,3 +28,5 @@ extern bool airbrakeEnabled;         // 🛑 Airbrake status
 extern uint8_t batteryPercentage;  // 🔋 Battery level
 
 #define idleDeviationThreshold 10  // 🎚️ Joystick idle threshold
+
+enum class FlightMode { MANUAL = 0, TAKEOFF = 1, STABILITY = 2, AUTOPILOT = 3, LANDING = 4 };  // 🛩️
