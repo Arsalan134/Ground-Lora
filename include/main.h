@@ -10,6 +10,10 @@ void onDisconnect();         // ❌ PS5 disconnect callback
 void removePairedDevices();  // 🧹 Clear Bluetooth pairings
 void printDeviceAddress();   // 📱 Print device MAC
 
+// SD Card 💾
+#include "SD-Card.h"
+void setupSD();  // 💾 Initialize SD card (currently disabled)
+
 // Display 🖥️
 #include "Display.h"
 int frameCount = 1;     // 🖼️ Number of display frames
