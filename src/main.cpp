@@ -20,7 +20,7 @@ void setup() {
 
   // pins_arduino.h 📱
   setupDisplay();  // 🖥️
-  // setupSD();      // 💾
+  // setupSD();    // 💾
   setupPS5();    // 🎮
   setupRadio();  // 📡
 }
@@ -52,53 +52,11 @@ void loop() {
     loraLoop();           // 📡
 }
 
-void setupSD() {
-  // 💾 SD Card Setup (Currently disabled)
-  // SPI.begin(SD_SCK, SD_MISO, SD_MOSI, SD_CS);
-
-  // if (!SD.begin(SD_CS)) {
-  //   Serial.println("❌ Card Mount Failed");
-  //   return;
-  // }
-
-  // uint8_t cardType = SD.cardType();
-
-  // if (cardType == CARD_NONE) {
-  //   Serial.println("💾❌ No SD card attached");
-  //   return;
-  // }
-
-  // Serial.print("💾 SD Card Type: ");
-  // if (cardType == CARD_MMC)
-  //   Serial.println("MMC");
-  // else if (cardType == CARD_SD)
-  //   Serial.println("SDSC");
-  // else if (cardType == CARD_SDHC)
-  //   Serial.println("SDHC");
-  // else
-  //   Serial.println("UNKNOWN");
-
-  // uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-  // Serial.printf("💾 SD Card Size: %lluMB\n", cardSize);
-
-  // listDir(SD, "/", 0);
-  // createDir(SD, "/mydir");
-  // listDir(SD, "/", 0);
-  // removeDir(SD, "/mydir");
-  // listDir(SD, "/", 2);
-  // writeFile(SD, "/hello.txt", "Hello ");
-  // appendFile(SD, "/hello.txt", "World!\n");
-  // readFile(SD, "/hello.txt");
-  // deleteFile(SD, "/foo.txt");
-  // renameFile(SD, "/hello.txt", "/foo.txt");
-  // readFile(SD, "/foo.txt");
-  // testFileIO(SD, "/test.txt");
-  // Serial.printf("💾 Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
-  // Serial.printf("💾 Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
-}
-
 void setupRadio() {
-  LoRa.setPins(LORA_CS, LORA_RST, LORA_IRQ);  // 📡 Configure LoRa pins
+  Serial.println("📡 Initializing LoRa radio...");
+
+  // Configure TTGO LoRa32 v2.1 pins
+  LoRa.setPins(LORA_CS, LORA_RST, LORA_IRQ);
 
   while (!LoRa.begin(frequency)) {
     Serial.println("❌ LoRa init failed. Check your connections.");
@@ -107,23 +65,47 @@ void setupRadio() {
 
   Serial.println("✅ LoRa init succeeded.");
   Serial.println();
-  Serial.println("📡 LoRa Simple Node");
-  Serial.println("📥 Only receive messages from gateways");
-  Serial.println("📤 Tx: invertIQ disable");
-  Serial.println("📥 Rx: invertIQ enable");
+  Serial.println("📡 LoRa Ground Station (TX-only mode)");
   Serial.println();
 
-  LoRa.setTxPower(20, PA_OUTPUT_PA_BOOST_PIN);  // 📡 Max power
+  // Configure LoRa parameters to match receiver (Fatima Board)
+  LoRa.setTxPower(20, PA_OUTPUT_PA_BOOST_PIN);  // 📡 Max power (20 dBm) - Full power!
+  LoRa.setSpreadingFactor(10);                  // 📡 SF10 (MUST match receiver!)
+  LoRa.setSignalBandwidth(125E3);               // 📡 125 kHz bandwidth
+  LoRa.setCodingRate4(5);                       // 📡 CR 4/5
+  LoRa.setSyncWord(0x12);                       // 📡 Sync word 0x12 (MUST match receiver!)
+  LoRa.setPreambleLength(8);                    // 📡 Preamble 8 symbols (MUST match receiver!)
+  LoRa.disableCrc();                            // 📡 Disable CRC (match receiver)
+  LoRa.disableInvertIQ();                       // 📡 Normal IQ (MUST match receiver!)
+  LoRa.setOCP(240);                             // 📡 Over Current Protection: 240mA (max for high power)
 
-  LoRa.onReceive(onReceive);
+  Serial.println("📡 LoRa Configuration:");
+  Serial.printf("   Frequency: %ld Hz\n", frequency);
+  Serial.println("   TX Power: 20 dBm (100mW) - FULL POWER");
+  Serial.println("   Spreading Factor: 10");
+  Serial.println("   Bandwidth: 125 kHz");
+  Serial.println("   Coding Rate: 4/5");
+  Serial.println("   Sync Word: 0x12");
+  Serial.println("   Preamble: 8 symbols");
+  Serial.println("   IQ Inversion: Disabled");
+  Serial.println("   OCP: 240mA");
+  Serial.println();
+
+  // TX-only mode - no need for callbacks or mode switching
   LoRa.onTxDone(onTxDone);
-  LoRa_txMode();
-  LoRa_rxMode();
 
-  // Send LoRa packet to receiver 🚀
+  // Stay in idle/TX mode (no RX mode switching)
+  LoRa.idle();
+
+  delay(100);  // Give it time to stabilize
+
+  // Send initial packet to confirm setup
+  Serial.println("📤 Sending initialization packet...");
   LoRa.beginPacket();
-  LoRa.print("🎯 Setup is Completed!");
-  LoRa.endPacket();
+  LoRa.print("🎯 Ground Station Ready!");
+  LoRa.endPacket(true);  // Blocking send
+
+  Serial.println("✅ LoRa radio ready!");
 }
 
 void setupPS5() {

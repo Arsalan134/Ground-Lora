@@ -25,10 +25,12 @@ void LoRa_txMode() {
 
 void LoRa_sendMessage(String message) {
   digitalWrite(BUILTIN_LED, 1);  // 💡 Turn on LED during transmission
-  // LoRa_txMode();         // set tx mode
+
   LoRa.beginPacket();    // 📦 start packet
   LoRa.print(message);   // 📝 add payload
-  LoRa.endPacket(true);  // 🚀 finish packet and send it
+  LoRa.endPacket(true);  // 🚀 finish packet and send it (blocking mode)
+
+  digitalWrite(BUILTIN_LED, 0);  // 💡 Turn off LED after transmission
 }
 
 void onReceive(int packetSize) {
@@ -40,9 +42,8 @@ void onReceive(int packetSize) {
 }
 
 void onTxDone() {
-  // Serial.println("📡 TxDone");
+  // Transmission complete - nothing to do for TX-only mode
   digitalWrite(BUILTIN_LED, 0);  // 💡 Turn off LED after transmission
-  // LoRa_rxMode();
 }
 
 boolean runEvery(unsigned long interval) {
@@ -84,7 +85,7 @@ void constructMessage() {
 }
 
 void loraLoop() {
-  if (runEvery(60)) {  // 📡 Send every 60ms
+  if (runEvery(100)) {  // 📡 Send every 100ms
     constructMessage();
 
     int aileronDeviation = abs(sendingAileronMessage - 127);      // ↔️ Aileron deviation from center
@@ -104,9 +105,13 @@ void loraLoop() {
       return;
     }
 
-    LoRa_sendMessage(message);  // 📡 send a message
+    // DEBUG: Print what we're sending
+    Serial.print("📤 TX [len=");
+    Serial.print(message.length());
+    Serial.print("]: ");
+    Serial.println(message);
 
-    // Serial.println("📡 LoRa Send: " + message);
+    LoRa_sendMessage(message);  // 📡 send a message
 
     if (checksum == previousChecksum)
       samePacketCount++;  // 📈 Increment duplicate count
