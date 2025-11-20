@@ -1,5 +1,8 @@
-#include <LoRa.h>
+#include <RadioLib.h>
 #include "common.h"
+
+// 📡 SX1262 Radio Instance with pin configuration
+SX1262 radio = new Module(LORA_CS, LORA_D1, LORA_RST, LORA_BUSY);
 
 // 📡 LoRa Communication Variables
 int sendingEngineMessage = 1;
@@ -14,35 +17,34 @@ bool resetElevatorTrim = false;
 bool airbrakeEnabled = false;  // 🛑 Airbrake status
 
 void LoRa_rxMode() {
-  LoRa.enableInvertIQ();  // 🔄 active invert I and Q signals
-  LoRa.receive();         // 📥 set receive mode
+  radio.startReceive();  // 📥 Start receive mode
 }
 
 void LoRa_txMode() {
-  LoRa.idle();             // ⏸️ set standby mode
-  LoRa.disableInvertIQ();  // ⚡ normal mode
+  radio.standby();  // ⏸️ Set standby mode
 }
 
 void LoRa_sendMessage(String message) {
   digitalWrite(BUILTIN_LED, 1);  // 💡 Turn on LED during transmission
-  // LoRa_txMode();         // set tx mode
-  LoRa.beginPacket();    // 📦 start packet
-  LoRa.print(message);   // 📝 add payload
-  LoRa.endPacket(true);  // 🚀 finish packet and send it
-}
 
-void onReceive(int packetSize) {
-  String message = "";  // 📥 Received message buffer
+  // Transmit packet using RadioLib (BLOCKING mode - no interrupts)
+  int state = radio.transmit(message);
 
-  while (LoRa.available()) {
-    message += (char)LoRa.read();
+  digitalWrite(BUILTIN_LED, 0);  // 💡 Turn off LED after transmission
+
+  if (state != RADIOLIB_ERR_NONE) {
+    Serial.print("📡 TX failed, code: ");
+    Serial.println(state);
   }
 }
 
-void onTxDone() {
+// Not used anymore - disabled interrupts to prevent watchdog timeout
+#if defined(ESP8266) || defined(ESP32)
+ICACHE_RAM_ATTR
+#endif
+void onTxDone(void) {
   // Serial.println("📡 TxDone");
   digitalWrite(BUILTIN_LED, 0);  // 💡 Turn off LED after transmission
-  // LoRa_rxMode();
 }
 
 boolean runEvery(unsigned long interval) {
@@ -79,8 +81,8 @@ void constructMessage() {
   message += "i" + String(sendingAileronTrimMessage);                                               // ⚖️ "i" is used for aileron trim
   message += "f" + String(sendingFlapsMessage);                                                     // 🪶 "f" is used for flaps
   message += "z" + String(resetAileronTrim ? 1 : 0);                                                // 🔄 "z" is used for reset aileron trim
-  message += "y" + String(resetElevatorTrim ? 1 : 0);  // 🔄 "y" is used for reset elevator trim
-  message += "b" + String(airbrakeEnabled ? 1 : 0);    // 🛑 "b" is used for airbrake
+  message += "y" + String(resetElevatorTrim ? 1 : 0);                                               // 🔄 "y" is used for reset elevator trim
+  message += "b" + String(airbrakeEnabled ? 1 : 0);                                                 // 🛑 "b" is used for airbrake
 }
 
 void loraLoop() {
@@ -99,14 +101,14 @@ void loraLoop() {
     message += checksum;  // 🔐 Add checksum
 
     // Skip sending if the same packet is sent multiple times 📦
-    if (checksum == previousChecksum && samePacketCount >= 10 &&
-        totalDeviation < idleDeviationThreshold) {  // only if joysticks are in neutral position 🕹️
-      return;
-    }
+    // if (checksum == previousChecksum && samePacketCount >= 10 &&
+    //     totalDeviation < idleDeviationThreshold) {  // only if joysticks are in neutral position 🕹️
+    //   return;
+    // }
 
     LoRa_sendMessage(message);  // 📡 send a message
 
-    // Serial.println("📡 LoRa Send: " + message);
+    Serial.println("📡 LoRa Send: " + message);
 
     if (checksum == previousChecksum)
       samePacketCount++;  // 📈 Increment duplicate count

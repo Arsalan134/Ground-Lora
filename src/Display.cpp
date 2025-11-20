@@ -12,10 +12,10 @@ void drawFrame1(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int1
   display->setTextAlignment(TEXT_ALIGN_LEFT);
   display->setFont(ArialMT_Plain_10);
 
-  if (ps5.isConnected()) {  // 🎮 PS5 controller connected
-    display->drawString(0 + x, 20 + y, String(ps5.L2Value()));
-    display->drawString(25 + x, 20 + y, String(ps5.R2Value()));
-  }
+  // if (ps5.isConnected()) {  // 🎮 PS5 controller connected
+  //   display->drawString(0 + x, 20 + y, String(ps5.L2Value()));
+  //   display->drawString(25 + x, 20 + y, String(ps5.R2Value()));
+  // }
 
   display->drawString(0 + x, 10 + y, String(sendingAileronMessage));     // ↔️ Aileron
   display->drawString(25 + x, 10 + y, String(sendingElevatorsMessage));  // ↕️ Elevator

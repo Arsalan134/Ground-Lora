@@ -2,7 +2,19 @@
 #include "SSD1306Wire.h"
 
 // pins 📌
-#define sliderPin 34
+#define SDA 18
+#define SCL 17
+
+#define sliderPin 12
+
+// SX1262 LoRa Module Pins 📡
+#define LORA_CS 7     // Chip Select (NSS)
+#define LORA_SCK 5    // SPI Clock
+#define LORA_MISO 3   // SPI MISO
+#define LORA_MOSI 6   // SPI MOSI
+#define LORA_D1 33    // DIO1 (IRQ)
+#define LORA_BUSY 34  // BUSY pin (required for SX1262)
+#define LORA_RST 8    // Reset pin
 
 // PS5 Controller 🎮
 #define PS5_MAC_ADDRESS "ac:36:1b:41:ac:ed"
@@ -29,4 +41,8 @@ extern uint8_t batteryPercentage;  // 🔋 Battery level
 
 #define idleDeviationThreshold 10  // 🎚️ Joystick idle threshold
 
-enum class FlightMode { MANUAL = 0, TAKEOFF = 1, STABILITY = 2, AUTOPILOT = 3, LANDING = 4 };  // 🛩️
+// enum class FlightMode { MANUAL = 0,
+//                         TAKEOFF = 1,
+//                         STABILITY = 2,
+//                         AUTOPILOT = 3,
+//                         LANDING = 4 };  // 🛩️

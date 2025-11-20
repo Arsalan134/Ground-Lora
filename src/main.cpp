@@ -18,79 +18,85 @@ void setup() {
 
   pinMode(BUILTIN_LED, OUTPUT);
 
+  // Initialize SPI with custom pins 📡
+  SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_CS);
+
   // pins_arduino.h 📱
   setupDisplay();  // 🖥️
   // setupSD();      // 💾
-  setupPS5();    // 🎮
+  // setupPS5();    // 🎮
   setupRadio();  // 📡
 }
 
 void loop() {
-  // Display
-  int remainingTimeBudget = display.update();
+  // Feed the watchdog
+  yield();
 
-  if (remainingTimeBudget > 0) {
-    // You can do some work here
-    // Don't do stuff if you are below your time budget.
+  // DISPLAY DISABLED - Causing watchdog timeout
+  // TODO: Move display to separate RTOS task on Core 0
+  display.update();
 
-    sendingEngineMessage = max((int)analogRead(sliderPin), (int)map(ps5.R2Value(), 0, 255, 0, 4095));
+  // Get engine value
+  sendingEngineMessage = max((int)analogRead(sliderPin), (int)map(rand() % 255, 0, 255, 0, 4095));
 
-    delay(remainingTimeBudget);
-  }
+  // For testing: Simple fixed value to avoid safety checks
+  // sendingEngineMessage = 100;  // Fixed value for testing LoRa
 
-  if (!sendingEngineMessage)       // If engine message is not being sent
-    setToZeroEngineSlider = true;  // Set the slider to zero. For safety measures
+  // if (ps5.isConnected())  // 🎮✅
+  loraLoop();  // 📡
 
-  if (!setToZeroEngineSlider && sendingEngineMessage) {
-    // For safety measures, if engine value is non zero, return 🚨
-    Serial.println("⚠️  Engine value is non zero, returning.");
-    delay(100);
-    return;
-  }
-
-  if (ps5.isConnected())  // 🎮✅
-    loraLoop();           // 📡
+  delay(10);  // Small delay to prevent tight loop
 }
 
 void setupRadio() {
-  LoRa.setPins(LORA_CS, LORA_RST, LORA_IRQ);  // 📡 Configure LoRa pins
+  Serial.print("📡 Initializing SX1262... ");
 
-  while (!LoRa.begin(frequency)) {
-    Serial.println("❌ LoRa init failed. Check your connections.");
-    delay(200);
+  // Initialize SX1262 with pin configuration
+  int state = radio.begin(frequency);
+
+  if (state != RADIOLIB_ERR_NONE) {
+    Serial.print("❌ LoRa init failed, code: ");
+    Serial.println(state);
+    while (true) {
+      delay(100);
+    }  // Halt on error
   }
 
   Serial.println("✅ LoRa init succeeded.");
   Serial.println();
-  Serial.println("📡 LoRa Simple Node");
-  Serial.println("📥 Only receive messages from gateways");
-  Serial.println("📤 Tx: invertIQ disable");
-  Serial.println("📥 Rx: invertIQ enable");
+  Serial.println("📡 LoRa Ground Station");
+  Serial.println("📡 Using SX1262 at 915MHz");
   Serial.println();
 
-  LoRa.setTxPower(20, PA_OUTPUT_PA_BOOST_PIN);  // 📡 Max power
+  // Configure radio settings
+  radio.setOutputPower(22);     // 📡 Set TX power to 22 dBm (max for SX1262)
+  radio.setSpreadingFactor(7);  // 📡 SF7 for faster data rate
+  radio.setBandwidth(125.0);    // 📡 125 kHz bandwidth
+  radio.setCodingRate(5);       // 📡 CR 4/5
+  radio.setPreambleLength(8);   // 📡 8 symbol preamble
+  // DON'T use interrupt - causes watchdog timeout in ISR
+  // radio.setDio1Action(onTxDone);
 
-  LoRa.onReceive(onReceive);
-  LoRa.onTxDone(onTxDone);
-  LoRa_txMode();
-  LoRa_rxMode();
+  // Send initial packet 🚀 (blocking mode)
+  String msg = "🎯 Setup Completed!";
+  int txState = radio.transmit(msg);
+  if (txState == RADIOLIB_ERR_NONE) {
+    Serial.println("✅ Initial packet sent");
+  }
 
-  // Send LoRa packet to receiver 🚀
-  LoRa.beginPacket();
-  LoRa.print("🎯 Setup is Completed!");
-  LoRa.endPacket();
+  Serial.println("📡 Radio configuration complete");
 }
 
 void setupPS5() {
-  removePairedDevices();  // 🧹 Clear previous pairings
+  // removePairedDevices();  // 🧹 Clear previous pairings
 
-  ps5.attach(notify);
-  ps5.attachOnConnect(onConnect);
-  ps5.attachOnDisconnect(onDisconnect);
+  // ps5.attach(notify);
+  // ps5.attachOnConnect(onConnect);
+  // ps5.attachOnDisconnect(onDisconnect);
 
-  ps5.begin(PS5_MAC_ADDRESS);  // 🎮 MAC addresss of Joystick
+  // ps5.begin(PS5_MAC_ADDRESS);  // 🎮 MAC addresss of Joystick
 
-  printDeviceAddress();  // 📱 Print device MAC
+  // printDeviceAddress();  // 📱 Print device MAC
 }
 
 // The ESP is capable of rendering 60fps in 80Mhz mode

@@ -1,16 +1,16 @@
-#include <ps5Controller.h>
-#include "esp_bt_device.h"
-#include "esp_bt_main.h"
-#include "esp_err.h"
-#include "esp_gap_bt_api.h"
+// #include <ps5Controller.h>
+// #include "esp_bt_device.h"
+// #include "esp_bt_main.h"
+// #include "esp_err.h"
+// #include "esp_gap_bt_api.h"
 
-#define EVENTS 0
-#define BUTTONS 0
-#define JOYSTICKS 0
-#define SENSORS 0
+// #define EVENTS 0
+// #define BUTTONS 0
+// #define JOYSTICKS 0
+// #define SENSORS 0
 
-void onConnect();
-void onDisconnect();
-void notify();
-void removePairedDevices();
-void printDeviceAddress();
+// void onConnect();
+// void onDisconnect();
+// void notify();
+// void removePairedDevices();
+// void printDeviceAddress();
