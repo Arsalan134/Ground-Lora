@@ -40,8 +40,8 @@ void drawFrame1(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int1
 
   // 📊 Telemetry from flight board
   if (tlm_valid && (millis() - tlm_lastReceived < 3000)) {
-    display->drawString(0 + x, 32 + y, "Alt:" + String(tlm_altitude, 0) + "m");
-    display->drawString(65 + x, 32 + y, String(tlm_temperature, 0) + "C");
+    display->drawString(0 + x, 32 + y, "Alt:" + String(tlm_altitude, 1) + "m");
+    display->drawString(65 + x, 32 + y, String(tlm_temperature, 1) + "C");
     display->drawString(0 + x, 42 + y, "RSSI:" + String(tlm_rssi));
     display->drawString(55 + x, 42 + y, "G:" + String(tlm_gforce, 1));
   } else {

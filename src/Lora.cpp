@@ -17,15 +17,17 @@ bool resetAileronTrim = false;
 bool resetElevatorTrim = false;
 bool airbrakeEnabled = false;  // 🛑 Airbrake status
 
+#ifdef PROTO_BIDIRECTIONAL
 // 📊 Telemetry data received from flight board (Air → Ground)
 float tlm_altitude = 0.0f;
 float tlm_pressure = 0.0f;
-int   tlm_rssi = 0;
+int tlm_rssi = 0;
 float tlm_gforce = 0.0f;
 float tlm_temperature = 0.0f;
 float tlm_verticalSpeed = 0.0f;
-bool  tlm_valid = false;
+bool tlm_valid = false;
 unsigned long tlm_lastReceived = 0;
+#endif
 
 // 📡 Fixed-size message buffer (no heap allocation)
 static char msgBuffer[PROTO_MSG_BUF_SIZE];
@@ -73,20 +75,21 @@ static uint32_t fnv1a_hash(const char* data, size_t len) {
 void constructMessage() {
   int engineVal = isEmergencyStopEnabled ? 0 : (int)map(sendingEngineMessage, PROTO_ENGINE_RAW_MIN, PROTO_ENGINE_RAW_MAX, PROTO_ENGINE_MIN, PROTO_ENGINE_MAX);
   snprintf(msgBuffer, sizeof(msgBuffer),
-    "%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c",
-    PROTO_KEY_ENGINE,    engineVal,
-    PROTO_KEY_AILERONS,  (int)map(sendingAileronMessage, PROTO_JOYSTICK_MIN, PROTO_JOYSTICK_MAX, PROTO_SERVO_MIN, PROTO_SERVO_MAX),
-    PROTO_KEY_RUDDER,    (int)map(sendingRudderMessage, PROTO_JOYSTICK_MIN, PROTO_JOYSTICK_MAX, PROTO_SERVO_MIN, PROTO_SERVO_MAX),
-    PROTO_KEY_ELEVATORS, (int)map(sendingElevatorsMessage, PROTO_JOYSTICK_MIN, PROTO_JOYSTICK_MAX, PROTO_SERVO_MIN, PROTO_SERVO_MAX),
-    PROTO_KEY_ELEV_TRIM, sendingElevatorTrimMessage,
-    PROTO_KEY_AIL_TRIM,  sendingAileronTrimMessage,
-    PROTO_KEY_FLAPS,     sendingFlapsMessage,
-    PROTO_KEY_RESET_AIL, resetAileronTrim ? 1 : 0,
-    PROTO_KEY_RESET_ELEV,resetElevatorTrim ? 1 : 0,
-    PROTO_KEY_AIRBRAKE,  airbrakeEnabled ? 1 : 0,
-    PROTO_CMD_END);
+           "%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c",
+           PROTO_KEY_ENGINE, engineVal,
+           PROTO_KEY_AILERONS, (int)map(sendingAileronMessage, PROTO_JOYSTICK_MIN, PROTO_JOYSTICK_MAX, PROTO_SERVO_MIN, PROTO_SERVO_MAX),
+           PROTO_KEY_RUDDER, (int)map(sendingRudderMessage, PROTO_JOYSTICK_MIN, PROTO_JOYSTICK_MAX, PROTO_SERVO_MIN, PROTO_SERVO_MAX),
+           PROTO_KEY_ELEVATORS, (int)map(sendingElevatorsMessage, PROTO_JOYSTICK_MIN, PROTO_JOYSTICK_MAX, PROTO_SERVO_MIN, PROTO_SERVO_MAX),
+           PROTO_KEY_ELEV_TRIM, sendingElevatorTrimMessage,
+           PROTO_KEY_AIL_TRIM, sendingAileronTrimMessage,
+           PROTO_KEY_FLAPS, sendingFlapsMessage,
+           PROTO_KEY_RESET_AIL, resetAileronTrim ? 1 : 0,
+           PROTO_KEY_RESET_ELEV, resetElevatorTrim ? 1 : 0,
+           PROTO_KEY_AIRBRAKE, airbrakeEnabled ? 1 : 0,
+           PROTO_CMD_END);
 }
 
+#ifdef PROTO_BIDIRECTIONAL
 // 📊 Parse telemetry packet from flight board
 static void parseTelemetry(const char* msg, int len) {
   if (len < PROTO_TLM_MIN_LEN || msg[0] != PROTO_KEY_TELEMETRY || msg[len - 1] != PROTO_TLM_END)
@@ -102,11 +105,11 @@ static void parseTelemetry(const char* msg, int len) {
     return 0.0f;
   };
 
-  tlm_altitude     = findField(PROTO_KEY_TELEMETRY);
-  tlm_pressure     = findField(PROTO_KEY_PRESSURE);
-  tlm_rssi         = (int)findField(PROTO_KEY_RSSI);
-  tlm_gforce       = findField(PROTO_KEY_GFORCE);
-  tlm_temperature  = findField(PROTO_KEY_TEMP);
+  tlm_altitude = findField(PROTO_KEY_TELEMETRY);
+  tlm_pressure = findField(PROTO_KEY_PRESSURE);
+  tlm_rssi = (int)findField(PROTO_KEY_RSSI);
+  tlm_gforce = findField(PROTO_KEY_GFORCE);
+  tlm_temperature = findField(PROTO_KEY_TEMP);
   tlm_verticalSpeed = findField(PROTO_KEY_SPEED);
   tlm_valid = true;
   tlm_lastReceived = millis();
@@ -115,7 +118,8 @@ static void parseTelemetry(const char* msg, int len) {
 // 📡 Check for incoming telemetry from flight board
 static void checkTelemetry() {
   int packetSize = LoRa.parsePacket();
-  if (packetSize == 0) return;
+  if (packetSize == 0)
+    return;
 
   char tlmBuf[PROTO_TLM_BUF_SIZE];
   int idx = 0;
@@ -132,13 +136,16 @@ static void checkTelemetry() {
                   tlm_altitude, tlm_temperature, tlm_rssi, tlm_gforce);
   }
 }
+#endif
 
 void loraLoop() {
   if (!lora_initialized)
     return;  // ⚠️ Skip if LoRa not initialized
 
+#ifdef PROTO_BIDIRECTIONAL
   // 📊 Check for incoming telemetry from flight board
   checkTelemetry();
+#endif
 
   if (runEvery(PROTO_CMD_INTERVAL_MS)) {  // 📡 Send every 60ms
     constructMessage();
