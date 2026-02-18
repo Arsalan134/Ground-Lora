@@ -1,8 +1,8 @@
-#include <RadioLib.h>
+#include <LoRa.h>
+#include <SPI.h>
 #include "common.h"
 
-// 📡 SX1262 Radio Instance with pin configuration
-SX1262 radio = new Module(LORA_CS, LORA_D1, LORA_RST, LORA_BUSY);
+bool lora_initialized = false;  // 📡 Track init status
 
 // 📡 LoRa Communication Variables
 int sendingEngineMessage = 1;
@@ -16,35 +16,18 @@ bool resetAileronTrim = false;
 bool resetElevatorTrim = false;
 bool airbrakeEnabled = false;  // 🛑 Airbrake status
 
-void LoRa_rxMode() {
-  radio.startReceive();  // 📥 Start receive mode
-}
-
-void LoRa_txMode() {
-  radio.standby();  // ⏸️ Set standby mode
-}
-
 void LoRa_sendMessage(String message) {
+  if (!lora_initialized)
+    return;  // ⚠️ Skip if LoRa not initialized
+
   digitalWrite(BUILTIN_LED, 1);  // 💡 Turn on LED during transmission
 
-  // Transmit packet using RadioLib (BLOCKING mode - no interrupts)
-  int state = radio.transmit(message);
+  LoRa.beginPacket();
+  LoRa.print(message);
+  LoRa.endPacket();  // 📡 Blocking mode - wait for TX to complete
 
   digitalWrite(BUILTIN_LED, 0);  // 💡 Turn off LED after transmission
-
-  if (state != RADIOLIB_ERR_NONE) {
-    Serial.print("📡 TX failed, code: ");
-    Serial.println(state);
-  }
-}
-
-// Not used anymore - disabled interrupts to prevent watchdog timeout
-#if defined(ESP8266) || defined(ESP32)
-ICACHE_RAM_ATTR
-#endif
-void onTxDone(void) {
-  // Serial.println("📡 TxDone");
-  digitalWrite(BUILTIN_LED, 0);  // 💡 Turn off LED after transmission
+  delay(5);                      // Small delay to ensure clean packet separation
 }
 
 boolean runEvery(unsigned long interval) {
@@ -83,10 +66,14 @@ void constructMessage() {
   message += "z" + String(resetAileronTrim ? 1 : 0);                                                // 🔄 "z" is used for reset aileron trim
   message += "y" + String(resetElevatorTrim ? 1 : 0);                                               // 🔄 "y" is used for reset elevator trim
   message += "b" + String(airbrakeEnabled ? 1 : 0);                                                 // 🛑 "b" is used for airbrake
+  message += "#";                                                                                   // 📌 End delimiter (hardware CRC validates integrity)
 }
 
 void loraLoop() {
-  if (runEvery(60)) {  // 📡 Send every 60ms
+  if (!lora_initialized)
+    return;  // ⚠️ Skip if LoRa not initialized
+
+  if (runEvery(120)) {  // 📡 Send every 120ms (more time for RX processing)
     constructMessage();
 
     int aileronDeviation = abs(sendingAileronMessage - 127);      // ↔️ Aileron deviation from center
@@ -94,28 +81,30 @@ void loraLoop() {
     int elevatorsDeviation = abs(sendingElevatorsMessage - 127);  // ↕️ Elevator deviation from center
     int totalDeviation = aileronDeviation + rudderDeviation + elevatorsDeviation;
 
-    byte checksum = simple_checksum((const byte*)message.c_str(), message.length());  // 🔐 Calculate checksum
-
-    // Add message delimiter and checksum
-    message += "#";       // 📌 Message delimiter
-    message += checksum;  // 🔐 Add checksum
+    // Use simple hash for duplicate detection (hardware CRC validates integrity)
+    byte currentHash = message.length() ^ sendingEngineMessage ^ sendingAileronMessage;
 
     // Skip sending if the same packet is sent multiple times 📦
-    // if (checksum == previousChecksum && samePacketCount >= 10 &&
-    //     totalDeviation < idleDeviationThreshold) {  // only if joysticks are in neutral position 🕹️
-    //   return;
-    // }
+    if (currentHash == previousChecksum && samePacketCount >= 10 &&
+        totalDeviation < idleDeviationThreshold) {  // only if joysticks are in neutral position 🕹️
+      return;
+    }
 
-    LoRa_sendMessage(message);  // 📡 send a message
+    LoRa_sendMessage(message);  // 📡 send a message (hardware CRC auto-calculated)
 
-    Serial.println("📡 LoRa Send: " + message);
+    // Reduced serial output - print every 10th packet
+    static int printCount = 0;
+    if (++printCount >= 10) {
+      Serial.println("📡 TX: " + message);
+      printCount = 0;
+    }
 
-    if (checksum == previousChecksum)
+    if (currentHash == previousChecksum)
       samePacketCount++;  // 📈 Increment duplicate count
     else
       samePacketCount = 0;  // 🔄 Reset duplicate count
 
-    previousChecksum = checksum;  // 💾 Store for comparison
+    previousChecksum = currentHash;  // 💾 Store for comparison
 
     // Reset messages
     message = "";                    // Clear message buffer

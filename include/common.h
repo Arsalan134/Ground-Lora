@@ -2,19 +2,16 @@
 #include "SSD1306Wire.h"
 
 // pins 📌
-#define SDA 18
-#define SCL 17
+#define SDA_PIN 21
+#define SCL_PIN 22
 
-#define sliderPin 12
+#define sliderPin 34
 
-// SX1262 LoRa Module Pins 📡
-#define LORA_CS 7     // Chip Select (NSS)
-#define LORA_SCK 5    // SPI Clock
-#define LORA_MISO 3   // SPI MISO
-#define LORA_MOSI 6   // SPI MOSI
-#define LORA_D1 33    // DIO1 (IRQ)
-#define LORA_BUSY 34  // BUSY pin (required for SX1262)
-#define LORA_RST 8    // Reset pin
+// TTGO LoRa32 V2.1 Built-in SX1276 Pins 📡
+#define LORA_CS 18    // Chip Select (NSS)
+#define LORA_RST 23   // Reset pin
+#define LORA_DIO0 26  // DIO0 (IRQ - RX/TX done)
+// SPI uses default VSPI: SCK=5, MISO=19, MOSI=27
 
 // PS5 Controller 🎮
 #define PS5_MAC_ADDRESS "ac:36:1b:41:ac:ed"
