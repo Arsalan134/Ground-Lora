@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "common.h"
+#include "protocol.h"
 
 // PS5 Controller 🎮
 #include <ps5Controller.h>
@@ -16,19 +17,21 @@ int frameCount = 1;     // 🖼️ Number of display frames
 int overlaysCount = 1;  // 📱 Number of display overlays
 void setupDisplay();    // 🖥️ Initialize OLED display
 
-// LoRa Communication 📡
+// LoRa Communication 📡 (parameters from protocol.h)
 #include <LoRa.h>
-const long LORA_FREQUENCY_HZ = 915E6;                     // 📡 LoRa Frequency (915MHz)
-const long LORA_BANDWIDTH_HZ = 125E3;                     // 📡 Bandwidth (125kHz)
-const int LORA_SF = 7;                                     // 📡 Spreading Factor
-const int LORA_CR = 5;                                     // 📡 Coding Rate (4/5)
-const int LORA_SW = 0x12;                                  // 📡 Sync Word
-const int LORA_POWER = 17;                                 // 📡 TX Power (dBm, max 17 for SX1276)
-const int LORA_PREAMBLE = 8;                               // 📡 Preamble Length
 boolean runEvery(unsigned long interval);                  // ⏰ Timer function
 void setupRadio();                                         // 📡 Initialize LoRa radio
 void loraLoop();                                           // 📡 Main LoRa communication loop
-uint8_t simple_checksum(const uint8_t* data, size_t len);  // 🔐 Checksum calculator
-void LoRa_sendMessage(String message);                     // 📡 Send LoRa message
+void LoRa_sendMessage(const char* message);                // 📡 Send LoRa message (zero-alloc)
 
 extern bool lora_initialized;  // 📡 LoRa init status
+
+// 📊 Telemetry from flight board (read-only, updated by LoRa RX)
+extern float tlm_altitude;
+extern float tlm_pressure;
+extern int   tlm_rssi;
+extern float tlm_gforce;
+extern float tlm_temperature;
+extern float tlm_verticalSpeed;
+extern bool  tlm_valid;
+extern unsigned long tlm_lastReceived;

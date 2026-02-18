@@ -1,6 +1,16 @@
 #include "Display.h"
 #include "PS5Joystick.h"
 #include "common.h"
+#include "protocol.h"
+
+// Telemetry externs
+extern float tlm_altitude;
+extern float tlm_pressure;
+extern int tlm_rssi;
+extern float tlm_gforce;
+extern float tlm_temperature;
+extern bool tlm_valid;
+extern unsigned long tlm_lastReceived;
 
 // Overlays are statically drawn on top of a frame eg. a clock
 OverlayCallback allOverlays[] = {/*wifiOverlay,*/ bluetoothOverlay, batteryOverlay, chargingOverlay};
@@ -24,13 +34,21 @@ void drawFrame1(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int1
   display->drawString(75 + x, 10 + y, String(isEmergencyStopEnabled ? "🚨STOP" : ""));
 
   // Slider 🎚️
-  display->drawString(50 + x, 20 + y, String(map(sendingEngineMessage, 0, 4095, 0, 100)) + "% 🚀Engine");
+  display->drawString(50 + x, 20 + y, String(map(sendingEngineMessage, 0, PROTO_ENGINE_RAW_MAX, 0, 100)) + "% Eng");
 
-  display->drawString(50 + x, 30 + y, String(sendingFlapsMessage));  // 🪶 Flaps
+  display->drawString(0 + x, 20 + y, "F:" + String(sendingFlapsMessage));  // 🪶 Flaps
 
-  display->drawXbm(x + 0, y + 36, ps5Icon::xres, ps5Icon::yres, ps5Icon::pixels);
+  // 📊 Telemetry from flight board
+  if (tlm_valid && (millis() - tlm_lastReceived < 3000)) {
+    display->drawString(0 + x, 32 + y, "Alt:" + String(tlm_altitude, 0) + "m");
+    display->drawString(65 + x, 32 + y, String(tlm_temperature, 0) + "C");
+    display->drawString(0 + x, 42 + y, "RSSI:" + String(tlm_rssi));
+    display->drawString(55 + x, 42 + y, "G:" + String(tlm_gforce, 1));
+  } else {
+    display->drawXbm(x + 0, y + 36, ps5Icon::xres, ps5Icon::yres, ps5Icon::pixels);
+  }
 
-  display->drawString(50 + x, 52 + y, "👨‍💻 Arsalan Iravani");  // 👨‍💻 Developer signature
+  display->drawString(50 + x, 52 + y, "👨‍💻 Arsalan Iravani");
 }
 
 // Demonstrates the 3 included default sizes. The fonts come from SSD1306Fonts.h file

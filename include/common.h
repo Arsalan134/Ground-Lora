@@ -36,7 +36,7 @@ extern bool airbrakeEnabled;         // 🛑 Airbrake status
 
 extern uint8_t batteryPercentage;  // 🔋 Battery level
 
-#define idleDeviationThreshold 10  // 🎚️ Joystick idle threshold
+// idleDeviationThreshold is now in protocol.h as PROTO_IDLE_THRESHOLD
 
 // enum class FlightMode { MANUAL = 0,
 //                         TAKEOFF = 1,
