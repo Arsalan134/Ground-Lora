@@ -146,7 +146,7 @@ void notify() {
 
 void onConnect() {
   Serial.println("✅ Connected!");
-  display.setOverlays(allOverlays, 3);  // Enable all overlays: BT + Battery + Charging
+  display.setOverlays(allOverlays, 1);  // Enable all overlays: BT + Battery + Charging
 }
 
 void onDisconnect() {

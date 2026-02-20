@@ -14,14 +14,12 @@
 // ============================================================================
 // 📻 LoRa Radio Parameters (MUST MATCH on both sides)
 // ============================================================================
-#define PROTO_LORA_FREQUENCY_MHZ 915.0f
 #define PROTO_LORA_FREQUENCY_HZ 915000000L
-#define PROTO_LORA_BANDWIDTH_KHZ 125.0f
-#define PROTO_LORA_BANDWIDTH_HZ 125000L
+#define PROTO_LORA_BANDWIDTH_HZ 250000L
 #define PROTO_LORA_SF 7
 #define PROTO_LORA_CR 5  // Coding rate 4/5
 #define PROTO_LORA_SYNC_WORD 0x12
-#define PROTO_LORA_PREAMBLE 8
+#define PROTO_LORA_PREAMBLE 6
 #define PROTO_LORA_TX_POWER 17  // dBm (aligned: both sides use 17)
 
 // ============================================================================
