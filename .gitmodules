@@ -1,0 +1,3 @@
+[submodule "lib/lora-protocol"]
+	path = lib/lora-protocol
+	url = https://github.com/arsalan134/lora-protocol.git
