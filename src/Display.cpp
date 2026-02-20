@@ -3,6 +3,7 @@
 #include "common.h"
 #include "protocol.h"
 
+#ifdef PROTO_BIDIRECTIONAL
 // Telemetry externs
 extern float tlm_altitude;
 extern float tlm_pressure;
@@ -11,6 +12,7 @@ extern float tlm_gforce;
 extern float tlm_temperature;
 extern bool tlm_valid;
 extern unsigned long tlm_lastReceived;
+#endif
 
 // Overlays are statically drawn on top of a frame eg. a clock
 OverlayCallback allOverlays[] = {/*wifiOverlay,*/ bluetoothOverlay, batteryOverlay, chargingOverlay};
@@ -39,6 +41,7 @@ void drawFrame1(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int1
   display->drawString(0 + x, 20 + y, "F:" + String(sendingFlapsMessage));  // 🪶 Flaps
 
   // 📊 Telemetry from flight board
+#ifdef PROTO_BIDIRECTIONAL
   if (tlm_valid && (millis() - tlm_lastReceived < 3000)) {
     display->drawString(0 + x, 32 + y, "Alt:" + String(tlm_altitude, 1) + "m");
     display->drawString(65 + x, 32 + y, String(tlm_temperature, 1) + "C");
@@ -47,6 +50,7 @@ void drawFrame1(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int1
   } else {
     display->drawXbm(x + 0, y + 36, ps5Icon::xres, ps5Icon::yres, ps5Icon::pixels);
   }
+#endif
 
   display->drawString(50 + x, 52 + y, "👨‍💻 Arsalan Iravani");
 }
