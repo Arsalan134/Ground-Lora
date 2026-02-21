@@ -19,9 +19,9 @@ void setupDisplay();    // 🖥️ Initialize OLED display
 
 // LoRa Communication 📡 (parameters from protocol.h)
 #include <LoRa.h>
-boolean runEvery(unsigned long interval);                  // ⏰ Timer function
-void setupRadio();                                         // 📡 Initialize LoRa radio
-void loraLoop();                                           // 📡 Main LoRa communication loop
+boolean runEvery(unsigned long interval);               // ⏰ Timer function
+void setupRadio();                                      // 📡 Initialize LoRa radio
+void loraLoop();                                        // 📡 Main LoRa communication loop
 void LoRa_sendPacket(const uint8_t* data, size_t len);  // 📡 Send binary LoRa packet
 
 extern bool lora_initialized;  // 📡 LoRa init status
@@ -29,9 +29,9 @@ extern bool lora_initialized;  // 📡 LoRa init status
 // 📊 Telemetry from flight board (read-only, updated by LoRa RX)
 extern float tlm_altitude;
 extern float tlm_pressure;
-extern int   tlm_rssi;
+extern int tlm_rssi;
 extern float tlm_gforce;
 extern float tlm_temperature;
 extern float tlm_verticalSpeed;
-extern bool  tlm_valid;
+extern bool tlm_valid;
 extern unsigned long tlm_lastReceived;

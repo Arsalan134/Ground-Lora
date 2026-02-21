@@ -62,10 +62,10 @@ uint32_t previousHash = 0;
 int samePacketCount = 0;
 
 // 🧮 FNV-1a hash — much lower collision rate than XOR
-static uint32_t fnv1a_hash(const char* data, size_t len) {
+static uint32_t fnv1a_hash(const uint8_t* data, size_t len) {
   uint32_t hash = 2166136261u;  // FNV offset basis
   for (size_t i = 0; i < len; i++) {
-    hash ^= (uint8_t)data[i];
+    hash ^= data[i];
     hash *= 16777619u;  // FNV prime
   }
   return hash;
@@ -153,7 +153,7 @@ void loraLoop() {
     int totalDeviation = aileronDeviation + rudderDeviation + elevatorsDeviation;
 
     // 🧮 FNV-1a hash on binary packet for accurate duplicate detection
-    uint32_t currentHash = fnv1a_hash((const char*)&cmdPacket, PROTO_CMD_PACKET_SIZE);
+    uint32_t currentHash = fnv1a_hash((const uint8_t*)&cmdPacket, PROTO_CMD_PACKET_SIZE);
 
     // Skip sending if the same packet is sent multiple times 📦
     if (currentHash == previousHash && samePacketCount >= PROTO_DUPLICATE_LIMIT &&
