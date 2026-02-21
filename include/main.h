@@ -22,7 +22,7 @@ void setupDisplay();    // 🖥️ Initialize OLED display
 boolean runEvery(unsigned long interval);                  // ⏰ Timer function
 void setupRadio();                                         // 📡 Initialize LoRa radio
 void loraLoop();                                           // 📡 Main LoRa communication loop
-void LoRa_sendMessage(const char* message);                // 📡 Send LoRa message (zero-alloc)
+void LoRa_sendPacket(const uint8_t* data, size_t len);  // 📡 Send binary LoRa packet
 
 extern bool lora_initialized;  // 📡 LoRa init status
 

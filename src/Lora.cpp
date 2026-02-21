@@ -29,17 +29,17 @@ bool tlm_valid = false;
 unsigned long tlm_lastReceived = 0;
 #endif
 
-// 📡 Fixed-size message buffer (no heap allocation)
-static char msgBuffer[PROTO_MSG_BUF_SIZE];
+// � Binary command packet buffer (10 bytes — was 48 byte ASCII buffer)
+static ProtoCmdPacket cmdPacket;
 
-void LoRa_sendMessage(const char* message) {
+void LoRa_sendPacket(const uint8_t* data, size_t len) {
   if (!lora_initialized)
     return;  // ⚠️ Skip if LoRa not initialized
 
   digitalWrite(BUILTIN_LED, 1);  // 💡 Turn on LED during transmission
 
   LoRa.beginPacket();
-  LoRa.print(message);
+  LoRa.write(data, len);
   LoRa.endPacket(true);  // 📡 Async mode - non-blocking TX
 
   digitalWrite(BUILTIN_LED, 0);  // 💡 Turn off LED after transmission
@@ -71,46 +71,42 @@ static uint32_t fnv1a_hash(const char* data, size_t len) {
   return hash;
 }
 
-// 📦 Build command packet into fixed buffer (zero heap allocation)
+// 📦 Build binary command packet (10 bytes, zero heap allocation)
 void constructMessage() {
-  int engineVal = isEmergencyStopEnabled ? 0 : (int)map(sendingEngineMessage, PROTO_ENGINE_RAW_MIN, PROTO_ENGINE_RAW_MAX, PROTO_ENGINE_MIN, PROTO_ENGINE_MAX);
-  snprintf(msgBuffer, sizeof(msgBuffer),
-           "%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c%d%c",
-           PROTO_KEY_ENGINE, engineVal,
-           PROTO_KEY_AILERONS, (int)map(sendingAileronMessage, PROTO_JOYSTICK_MIN, PROTO_JOYSTICK_MAX, PROTO_SERVO_MIN, PROTO_SERVO_MAX),
-           PROTO_KEY_RUDDER, (int)map(sendingRudderMessage, PROTO_JOYSTICK_MIN, PROTO_JOYSTICK_MAX, PROTO_SERVO_MIN, PROTO_SERVO_MAX),
-           PROTO_KEY_ELEVATORS, (int)map(sendingElevatorsMessage, PROTO_JOYSTICK_MIN, PROTO_JOYSTICK_MAX, PROTO_SERVO_MIN, PROTO_SERVO_MAX),
-           PROTO_KEY_ELEV_TRIM, sendingElevatorTrimMessage,
-           PROTO_KEY_AIL_TRIM, sendingAileronTrimMessage,
-           PROTO_KEY_FLAPS, sendingFlapsMessage,
-           PROTO_KEY_RESET_AIL, resetAileronTrim ? 1 : 0,
-           PROTO_KEY_RESET_ELEV, resetElevatorTrim ? 1 : 0,
-           PROTO_KEY_AIRBRAKE, airbrakeEnabled ? 1 : 0,
-           PROTO_CMD_END);
+  cmdPacket.magic = PROTO_CMD_MAGIC;
+  cmdPacket.engine = isEmergencyStopEnabled ? 0 : (uint8_t)map(sendingEngineMessage, PROTO_ENGINE_RAW_MIN, PROTO_ENGINE_RAW_MAX, PROTO_ENGINE_MIN, PROTO_ENGINE_MAX);
+  cmdPacket.ailerons = (uint8_t)map(sendingAileronMessage, PROTO_JOYSTICK_MIN, PROTO_JOYSTICK_MAX, PROTO_SERVO_MIN, PROTO_SERVO_MAX);
+  cmdPacket.rudder = (uint8_t)map(sendingRudderMessage, PROTO_JOYSTICK_MIN, PROTO_JOYSTICK_MAX, PROTO_SERVO_MIN, PROTO_SERVO_MAX);
+  cmdPacket.elevators = (uint8_t)map(sendingElevatorsMessage, PROTO_JOYSTICK_MIN, PROTO_JOYSTICK_MAX, PROTO_SERVO_MIN, PROTO_SERVO_MAX);
+  cmdPacket.elevatorTrim = (int8_t)sendingElevatorTrimMessage;
+  cmdPacket.aileronTrim = (int8_t)sendingAileronTrimMessage;
+  cmdPacket.flaps = (uint8_t)sendingFlapsMessage;
+  cmdPacket.flags = 0;
+  if (resetAileronTrim)  cmdPacket.flags |= PROTO_FLAG_RESET_AIL;
+  if (resetElevatorTrim) cmdPacket.flags |= PROTO_FLAG_RESET_ELEV;
+  if (airbrakeEnabled)   cmdPacket.flags |= PROTO_FLAG_AIRBRAKE;
+  cmdPacket.checksum = proto_checksum((const uint8_t*)&cmdPacket, PROTO_CMD_PACKET_SIZE - 1);
 }
 
 #ifdef PROTO_BIDIRECTIONAL
-// 📊 Parse telemetry packet from flight board
-static void parseTelemetry(const char* msg, int len) {
-  if (len < PROTO_TLM_MIN_LEN || msg[0] != PROTO_KEY_TELEMETRY || msg[len - 1] != PROTO_TLM_END)
-    return;
+// 📊 Parse binary telemetry packet from flight board (14 bytes)
+static void parseTelemetry(const uint8_t* data, int len) {
+  if (len != PROTO_TLM_PACKET_SIZE) return;
 
-  // Simple float parser for telemetry fields
-  auto findField = [&](char key) -> float {
-    for (int i = 0; i < len; i++) {
-      if (msg[i] == key) {
-        return atof(&msg[i + 1]);
-      }
-    }
-    return 0.0f;
-  };
+  const ProtoTlmPacket* pkt = (const ProtoTlmPacket*)data;
+  if (pkt->magic != PROTO_TLM_MAGIC) return;
 
-  tlm_altitude = findField(PROTO_KEY_TELEMETRY);
-  tlm_pressure = findField(PROTO_KEY_PRESSURE);
-  tlm_rssi = (int)findField(PROTO_KEY_RSSI);
-  tlm_gforce = findField(PROTO_KEY_GFORCE);
-  tlm_temperature = findField(PROTO_KEY_TEMP);
-  tlm_verticalSpeed = findField(PROTO_KEY_SPEED);
+  // Validate software checksum
+  uint8_t expected = proto_checksum(data, PROTO_TLM_PACKET_SIZE - 1);
+  if (pkt->checksum != expected) return;
+
+  // Decode fixed-point → float
+  tlm_altitude      = pkt->altitude_dm    / 10.0f;
+  tlm_pressure      = pkt->pressure_dPa   / 10.0f;
+  tlm_rssi          = (int)pkt->rssi;
+  tlm_gforce        = pkt->gforce_centi   / 100.0f;
+  tlm_temperature   = pkt->temperature_dC / 10.0f;
+  tlm_verticalSpeed = pkt->vspeed_dms     / 10.0f;
   tlm_valid = true;
   tlm_lastReceived = millis();
 }
@@ -121,18 +117,19 @@ static void checkTelemetry() {
   if (packetSize == 0)
     return;
 
-  char tlmBuf[PROTO_TLM_BUF_SIZE];
+  uint8_t rxBuf[PROTO_RX_BUF_SIZE];
   int idx = 0;
-  while (LoRa.available() && idx < (int)sizeof(tlmBuf) - 1) {
-    tlmBuf[idx++] = (char)LoRa.read();
+  while (LoRa.available() && idx < (int)sizeof(rxBuf)) {
+    rxBuf[idx++] = (uint8_t)LoRa.read();
   }
-  tlmBuf[idx] = '\0';
+  // Drain any extra bytes
+  while (LoRa.available()) LoRa.read();
 
-  parseTelemetry(tlmBuf, idx);
+  parseTelemetry(rxBuf, idx);
 
   static int tlmCount = 0;
   if (++tlmCount % 5 == 0) {
-    Serial.printf("📊 TLM: Alt=%.1fm T=%.1f°C RSSI=%d G=%.1f\n",
+    Serial.printf("📊 TLM: Alt=%.1fm T=%.1f°C RSSI=%d G=%.2f\n",
                   tlm_altitude, tlm_temperature, tlm_rssi, tlm_gforce);
   }
 }
@@ -147,7 +144,7 @@ void loraLoop() {
   checkTelemetry();
 #endif
 
-  if (runEvery(PROTO_CMD_INTERVAL_MS)) {  // 📡 Send every 60ms
+  if (runEvery(PROTO_CMD_INTERVAL_MS)) {  // 📡 Send every 50ms
     constructMessage();
 
     int aileronDeviation = abs(sendingAileronMessage - PROTO_JOYSTICK_CENTER);
@@ -155,9 +152,8 @@ void loraLoop() {
     int elevatorsDeviation = abs(sendingElevatorsMessage - PROTO_JOYSTICK_CENTER);
     int totalDeviation = aileronDeviation + rudderDeviation + elevatorsDeviation;
 
-    // 🧮 FNV-1a hash on full message for accurate duplicate detection
-    size_t msgLen = strlen(msgBuffer);
-    uint32_t currentHash = fnv1a_hash(msgBuffer, msgLen);
+    // 🧮 FNV-1a hash on binary packet for accurate duplicate detection
+    uint32_t currentHash = fnv1a_hash((const char*)&cmdPacket, PROTO_CMD_PACKET_SIZE);
 
     // Skip sending if the same packet is sent multiple times 📦
     if (currentHash == previousHash && samePacketCount >= PROTO_DUPLICATE_LIMIT &&
@@ -165,12 +161,14 @@ void loraLoop() {
       return;
     }
 
-    LoRa_sendMessage(msgBuffer);  // 📡 Send command (async, non-blocking)
+    LoRa_sendPacket((const uint8_t*)&cmdPacket, PROTO_CMD_PACKET_SIZE);  // 📡 Send binary (10 bytes)
 
     // Reduced serial output - print every 10th packet
     static int printCount = 0;
     if (++printCount >= 10) {
-      Serial.printf("📡 TX: %s\n", msgBuffer);
+      Serial.printf("📡 TX [%dB]: E=%d A=%d R=%d L=%d F=%d flags=0x%02X\n",
+                    PROTO_CMD_PACKET_SIZE, cmdPacket.engine, cmdPacket.ailerons,
+                    cmdPacket.rudder, cmdPacket.elevators, cmdPacket.flaps, cmdPacket.flags);
       printCount = 0;
     }
 

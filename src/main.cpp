@@ -108,8 +108,14 @@ void setupRadio() {
   Serial.printf("   TX Power:   %d dBm\n", PROTO_LORA_TX_POWER);
   Serial.println();
 
-  // Send initial packet 🚀
-  LoRa_sendMessage("Setup Completed!");
+  // Send initial test packet 🚀
+  ProtoCmdPacket initPkt = {0};
+  initPkt.magic = PROTO_CMD_MAGIC;
+  initPkt.ailerons = 90;
+  initPkt.rudder = 90;
+  initPkt.elevators = 90;
+  initPkt.checksum = proto_checksum((const uint8_t*)&initPkt, PROTO_CMD_PACKET_SIZE - 1);
+  LoRa_sendPacket((const uint8_t*)&initPkt, PROTO_CMD_PACKET_SIZE);
   Serial.println("✅ Initial packet sent");
   Serial.println("📡 Radio configuration complete");
 }
