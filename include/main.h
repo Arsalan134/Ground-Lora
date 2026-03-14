@@ -8,6 +8,7 @@ void setupPS5();             // 🎮 Initialize PS5 controller
 void onConnect();            // ✅ PS5 connect callback
 void notify();               // 📡 PS5 input handler
 void onDisconnect();         // ❌ PS5 disconnect callback
+void checkPS5Connection();   // 🎮 Poll-based disconnect detection
 void removePairedDevices();  // 🧹 Clear Bluetooth pairings
 void printDeviceAddress();   // 📱 Print device MAC
 

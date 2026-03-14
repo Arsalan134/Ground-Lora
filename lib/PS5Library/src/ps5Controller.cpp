@@ -49,10 +49,13 @@ bool ps5Controller::begin(const char* mac) {
     return false;
   }
 
-  ps5_l2cap_connect(addr);
-  // ps5SetBluetoothMacAddress(addr);
+  // Initialize BT stack FIRST, then connect L2CAP
+  if (!begin()) {
+    return false;
+  }
 
-  return begin();
+  ps5_l2cap_connect(addr);
+  return true;
 }
 
 void ps5Controller::end() {}

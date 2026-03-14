@@ -11,6 +11,7 @@
 
 void onConnect();
 void onDisconnect();
+void checkPS5Connection();  // 🎮 Poll-based disconnect detection
 void notify();
 void removePairedDevices();
 void printDeviceAddress();

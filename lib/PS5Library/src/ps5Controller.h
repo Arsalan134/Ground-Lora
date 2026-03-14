@@ -2,6 +2,7 @@
 #define ps5Controller_h
 
 #include "Arduino.h"
+#include "esp32-hal-bt-mem.h"  // Prevent Arduino core from releasing BT memory at startup
 
 extern "C" {
 #include "ps5.h"

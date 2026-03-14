@@ -1,5 +1,6 @@
 #include <LoRa.h>
 #include <SPI.h>
+#include <math.h>
 #include "common.h"
 #include "protocol.h"
 
@@ -16,6 +17,32 @@ int sendingFlapsMessage = 0;  // 🪶 Flaps: 0, 1, 2, 3, 4
 bool resetAileronTrim = false;
 bool resetElevatorTrim = false;
 bool airbrakeEnabled = false;  // 🛑 Airbrake status
+bool acsEngageEnabled = false; // 🤖 ACS autopilot engage
+uint8_t stabilityAssistValue = 0; // 🛡️ Stability assist L2 analog
+
+// ⏱️ Flight timer
+unsigned long flightTimerStartMs = 0;
+bool flightTimerRunning = false;
+
+// 🟥 Expo presets — cycled via Square button
+// Columns: {aileron, elevator, rudder}
+static const float expoPresets[3][3] = {
+  {0.10f, 0.10f, 0.05f},  // 0: LOW  — nearly linear
+  {0.35f, 0.30f, 0.20f},  // 1: MED  — default
+  {0.55f, 0.50f, 0.35f},  // 2: HIGH — strong curve
+};
+const char* const expoPresetNames[] = {"LOW", "MED", "HIGH"};
+uint8_t expoPresetIndex = 1;  // default: MED
+float expoAileron  = 0.35f;
+float expoElevator = 0.30f;
+float expoRudder   = 0.20f;
+
+void cycleExpoPreset() {
+  expoPresetIndex = (expoPresetIndex + 1) % 3;
+  expoAileron  = expoPresets[expoPresetIndex][0];
+  expoElevator = expoPresets[expoPresetIndex][1];
+  expoRudder   = expoPresets[expoPresetIndex][2];
+}
 
 #ifdef PROTO_BIDIRECTIONAL
 // 📊 Telemetry data received from flight board (Air → Ground)
@@ -31,7 +58,26 @@ unsigned long tlm_lastReceived = 0;
 
 // � Binary command packet buffer (10 bytes — was 48 byte ASCII buffer)
 static ProtoCmdPacket cmdPacket;
+// 🎮 Expo/Rates: apply exponential curve to joystick input.
+// Input:  raw joystick byte 0–255 (127/128 = center)
+// Output: servo value 0–180 (90 = center) with expo + rate applied.
+// Formula: out = (1-expo)*x + expo*x³  where x ∈ [-1,+1]
+static uint8_t applyExpoRate(byte rawJoystick, float expo, float rate) {
+  // Normalize to [-1, +1]
+  float x = ((float)rawJoystick - 127.5f) / 127.5f;
+  x = constrain(x, -1.0f, 1.0f);
 
+  // Expo curve: blend linear and cubic
+  float curved = (1.0f - expo) * x + expo * x * x * x;
+
+  // Apply rate (scales the throw)
+  curved *= rate;
+  curved = constrain(curved, -1.0f, 1.0f);
+
+  // Map back to servo range 0–180 (90 = center)
+  float servo = 90.0f + curved * 90.0f;
+  return (uint8_t)constrain((int)roundf(servo), 0, 180);
+}
 void LoRa_sendPacket(const uint8_t* data, size_t len) {
   if (!lora_initialized)
     return;  // ⚠️ Skip if LoRa not initialized
@@ -75,9 +121,9 @@ static uint32_t fnv1a_hash(const uint8_t* data, size_t len) {
 void constructMessage() {
   cmdPacket.magic = PROTO_CMD_MAGIC;
   cmdPacket.engine = isEmergencyStopEnabled ? 0 : (uint8_t)map(sendingEngineMessage, PROTO_ENGINE_RAW_MIN, PROTO_ENGINE_RAW_MAX, PROTO_ENGINE_MIN, PROTO_ENGINE_MAX);
-  cmdPacket.ailerons = (uint8_t)map(sendingAileronMessage, PROTO_JOYSTICK_MIN, PROTO_JOYSTICK_MAX, PROTO_SERVO_MIN, PROTO_SERVO_MAX);
-  cmdPacket.rudder = (uint8_t)map(sendingRudderMessage, PROTO_JOYSTICK_MIN, PROTO_JOYSTICK_MAX, PROTO_SERVO_MIN, PROTO_SERVO_MAX);
-  cmdPacket.elevators = (uint8_t)map(sendingElevatorsMessage, PROTO_JOYSTICK_MIN, PROTO_JOYSTICK_MAX, PROTO_SERVO_MIN, PROTO_SERVO_MAX);
+  cmdPacket.ailerons = applyExpoRate(sendingAileronMessage, expoAileron, RATE_AILERON);
+  cmdPacket.rudder = applyExpoRate(sendingRudderMessage, expoRudder, RATE_RUDDER);
+  cmdPacket.elevators = applyExpoRate(sendingElevatorsMessage, expoElevator, RATE_ELEVATOR);
   cmdPacket.elevatorTrim = (int8_t)sendingElevatorTrimMessage;
   cmdPacket.aileronTrim = (int8_t)sendingAileronTrimMessage;
   cmdPacket.flaps = (uint8_t)sendingFlapsMessage;
@@ -85,6 +131,8 @@ void constructMessage() {
   if (resetAileronTrim)  cmdPacket.flags |= PROTO_FLAG_RESET_AIL;
   if (resetElevatorTrim) cmdPacket.flags |= PROTO_FLAG_RESET_ELEV;
   if (airbrakeEnabled)   cmdPacket.flags |= PROTO_FLAG_AIRBRAKE;
+  if (acsEngageEnabled)  cmdPacket.flags |= PROTO_FLAG_ACS;
+  cmdPacket.stabilityAssist = stabilityAssistValue;
   cmdPacket.checksum = proto_checksum((const uint8_t*)&cmdPacket, PROTO_CMD_PACKET_SIZE - 1);
 }
 

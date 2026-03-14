@@ -4,8 +4,12 @@
 unsigned long lastTimeStamp = 0;
 
 unsigned long lastFlapsChangeTimestamp = 0;
+unsigned long lastExpoChangeTimestamp = 0;
 
 uint8_t batteryPercentage = 0;
+
+// 🎮 Software disconnect detection (library callback is unreliable)
+static bool wasConnected = false;
 
 void removePairedDevices() {
   uint8_t pairedDeviceBtAddr[20][6];
@@ -20,6 +24,11 @@ void printDeviceAddress() {
   const uint8_t* point = esp_bt_dev_get_address();
 
   Serial.print("📱 This device MAC is: ");
+
+  if (point == NULL) {
+    Serial.println("⚠️  Bluetooth not ready");
+    return;
+  }
 
   for (int i = 0; i < 6; i++) {
     char str[3];
@@ -50,19 +59,31 @@ void notify() {
     if (ps5.Left())  // Left Button ⬅️
       sendingAileronTrimMessage = -1;
 
-    // if (ps5.Square()) // Square Button ⏹️
+    if (ps5.Square() && millis() - lastExpoChangeTimestamp > 300) {  // 🟥 Square: cycle expo preset
+      cycleExpoPreset();
+      lastExpoChangeTimestamp = millis();
+    }
 
     if (ps5.Cross()) {  // Cross Button ❌
       digitalWrite(BUILTIN_LED, 1);
       isEmergencyStopEnabled = false;  // 🔓 Disable emergency stop
       airbrakeEnabled = false;         // 🚀 Disable airbrake
+      acsEngageEnabled = false;        // 🤖 Disable ACS
+      // ⏱️ Start flight timer on arm
+      if (!flightTimerRunning) {
+        flightTimerStartMs = millis();
+        flightTimerRunning = true;
+      }
     } else
       digitalWrite(BUILTIN_LED, 0);
 
-    if (ps5.Circle())                 // Circle Button ⭕
+    if (ps5.Circle()) {               // Circle Button ⭕
       isEmergencyStopEnabled = true;  // 🚨 Enable emergency stop
+      flightTimerRunning = false;     // ⏱️ Stop flight timer on disarm
+    }
 
-    // if (ps5.Triangle()) // Triangle Button 🔺
+    if (ps5.Triangle())         // Triangle Button 🔺
+      acsEngageEnabled = true;  // 🤖 Engage ACS autopilot
 
     if (ps5.L1() && millis() - lastFlapsChangeTimestamp > 200) {
       sendingFlapsMessage = constrain(sendingFlapsMessage - 1, 0, 4);  // ⬇️ Decrease flaps
@@ -93,6 +114,9 @@ void notify() {
     sendingAileronMessage = ps5.LStickX() + 128;    // ↔️ Aileron
     sendingRudderMessage = ps5.RStickX() + 128;     // ↔️ Rudder
     sendingElevatorsMessage = ps5.RStickY() + 128;  // ↕️ Elevators
+
+    // 🛡️ Stability Assist — L2 analog trigger (0-255)
+    stabilityAssistValue = ps5.L2Value();
 
 #if EVENTS
     boolean sqd = ps5.event.button_down.square, squ = ps5.event.button_up.square, trd = ps5.event.button_down.triangle,
@@ -146,9 +170,22 @@ void notify() {
 
 void onConnect() {
   Serial.println("✅ Connected!");
-  display.setOverlays(allOverlays, 1);  // Enable all overlays: BT + Battery + Charging
+  wasConnected = true;
+  display.setOverlays(allOverlays, 1);  // Enable all overlays: BT
 }
 
 void onDisconnect() {
   Serial.println("❌ Disconnected!");
+  wasConnected = false;
+  display.setOverlays(allOverlays, 0);  // Disable all overlays
+}
+
+// 🎮 Poll-based disconnect detection — call from loop/task
+// The ps5Controller onDisconnect callback often doesn't fire,
+// so we detect the transition ourselves.
+void checkPS5Connection() {
+  bool connected = ps5.isConnected();
+  if (wasConnected && !connected) {
+    onDisconnect();
+  }
 }

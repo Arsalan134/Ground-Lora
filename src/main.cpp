@@ -11,8 +11,9 @@ FrameCallback frames[] = {drawFrame1};
 bool setToZeroEngineSlider = false;
 bool isEmergencyStopEnabled = true;
 
-// 🖥️ Display task handle (runs on Core 0)
+// Task handles
 static TaskHandle_t displayTaskHandle = NULL;
+static TaskHandle_t loraTaskHandle = NULL;
 
 void setup() {
   Serial.begin(115200);
@@ -28,47 +29,62 @@ void setup() {
   setupPS5();    // 🎮
   setupRadio();  // 📡
 
-  // 🖥️ Create display task on Core 0 (frees Core 1 for realtime control)
+  // � LoRa task — Core 1, priority 2 (higher than display, preempts for timely TX/RX)
   xTaskCreatePinnedToCore(
-    [](void* pvParameters) {
-      while (true) {
-        display.update();
-        vTaskDelay(pdMS_TO_TICKS(16));  // ~60 FPS
-      }
-    },
-    "DisplayTask",
-    4096,
-    NULL,
-    1,     // Low priority
-    &displayTaskHandle,
-    0      // Core 0
+      [](void* pvParameters) {
+        TickType_t xLastWakeTime = xTaskGetTickCount();
+        while (true) {         
+            checkPS5Connection();  // 🎮 Detect PS5 disconnect (library callback unreliable)         
+            if (ps5.isConnected())
+              loraLoop();
+          vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(1));
+        }
+      },
+      "LoRaTask",
+      4096,
+      NULL,
+      2,  // Higher priority — preempts display for timely TX
+      &loraTaskHandle,
+      1  // Core 1
   );
-  Serial.println(F("✅ DisplayTask created on Core 0"));
+  Serial.println(F("✅ LoRaTask created on Core 1 (priority 2)"));
+
+  // 🖥️ Display task — Core 1, priority 1 (yields to LoRa when it needs the CPU)
+  xTaskCreatePinnedToCore(
+      [](void* pvParameters) {
+        while (true) {
+          int remaining = display.update();
+          if (remaining > 1) {
+            vTaskDelay(pdMS_TO_TICKS(remaining));
+          } else {
+            vTaskDelay(1);
+          }
+        }
+      },
+      "DisplayTask",
+      4096,
+      NULL,
+      1,  // Lower priority — yields to LoRa
+      &displayTaskHandle,
+      1  // Core 1
+  );
+  Serial.println(F("✅ DisplayTask created on Core 1 (priority 1)"));
 }
 
 void loop() {
-  // Feed the watchdog
-  yield();
+  // 🎚️ Engine slider (ADC) + PS5 R2 trigger — take the higher value
+  int sliderValue = analogRead(sliderPin);
+  int ps5Throttle = ps5.isConnected() ? (int)map(ps5.R2Value(), 0, 255, 0, PROTO_ENGINE_RAW_MAX) : 0;
+  sendingEngineMessage = max(sliderValue, ps5Throttle);
 
-  // Display rendering moved to Core 0 DisplayTask
+  // 🛡️ Safety: slider must start at zero before accepting throttle
+  if (!sendingEngineMessage)
+    setToZeroEngineSlider = true;
 
-  // Get engine value from slider
-  sendingEngineMessage = max((int)analogRead(sliderPin), (int)map(ps5.R2Value(), 0, 255, 0, PROTO_ENGINE_RAW_MAX));
+  if (!setToZeroEngineSlider && sendingEngineMessage)
+    sendingEngineMessage = 0;  // 🚨 Force zero until slider zeroed
 
-  if (!sendingEngineMessage)       // If engine message is not being sent
-    setToZeroEngineSlider = true;  // Set the slider to zero. For safety measures
-
-  if (!setToZeroEngineSlider && sendingEngineMessage) {
-    // For safety measures, if engine value is non zero, return 🚨
-    Serial.println("⚠️  Engine value is non zero, returning.");
-    delay(100);
-    return;
-  }
-
-  if (ps5.isConnected())  // 🎮✅
-    loraLoop();           // 📡
-
-  vTaskDelay(pdMS_TO_TICKS(1));  // Minimal yield instead of delay(10)
+  vTaskDelay(pdMS_TO_TICKS(10));  // 100Hz ADC polling is plenty
 }
 
 void setupRadio() {
