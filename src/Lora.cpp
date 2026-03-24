@@ -5,6 +5,7 @@
 #include "protocol.h"
 
 bool lora_initialized = false;  // 📡 Track init status
+bool ecoModeEnabled = true;     // 🌿 ECO mode: suppress duplicate packets (default ON)
 
 // 📡 LoRa Communication Variables
 int sendingEngineMessage = 1;
@@ -203,8 +204,9 @@ void loraLoop() {
     // 🧮 FNV-1a hash on binary packet for accurate duplicate detection
     uint32_t currentHash = fnv1a_hash((const uint8_t*)&cmdPacket, PROTO_CMD_PACKET_SIZE);
 
-    // Skip sending if the same packet is sent multiple times 📦
-    if (currentHash == previousHash && samePacketCount >= PROTO_DUPLICATE_LIMIT &&
+    // 🌿 ECO mode: skip sending duplicate packets when idle (saves bandwidth)
+    if (ecoModeEnabled && currentHash == previousHash &&
+        samePacketCount >= PROTO_DUPLICATE_LIMIT &&
         totalDeviation < PROTO_IDLE_THRESHOLD) {
       return;
     }

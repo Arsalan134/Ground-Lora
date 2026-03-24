@@ -35,6 +35,7 @@ extern bool isEmergencyStopEnabled;  // 🚨 Emergency stop status
 extern bool airbrakeEnabled;         // 🛑 Airbrake status
 extern bool acsEngageEnabled;        // 🤖 ACS autopilot engage
 extern uint8_t stabilityAssistValue;  // 🛡️ Stability assist L2 analog 0-255
+extern bool ecoModeEnabled;           // 🌿 ECO mode: suppress duplicate packets (default ON)
 
 extern uint8_t batteryPercentage;  // 🔋 Battery level
 

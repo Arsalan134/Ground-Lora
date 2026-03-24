@@ -25,3 +25,5 @@ void drawFrame3(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int1
 void drawFrame4(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int16_t y);
 
 void drawFrame5(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int16_t y);
+
+static void drawPill(OLEDDisplay* display, int16_t x, int16_t y, const char* text, bool active);

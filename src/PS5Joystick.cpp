@@ -5,6 +5,7 @@ unsigned long lastTimeStamp = 0;
 
 unsigned long lastFlapsChangeTimestamp = 0;
 unsigned long lastExpoChangeTimestamp = 0;
+unsigned long lastShareChangeTimestamp = 0;
 
 uint8_t batteryPercentage = 0;
 
@@ -95,7 +96,10 @@ void notify() {
       lastFlapsChangeTimestamp = millis();
     }
 
-    // if (ps5.Share()) // Share Button 🔗
+    if (ps5.Share() && millis() - lastShareChangeTimestamp > 300) {  // 🌿 Share: toggle ECO mode
+      ecoModeEnabled = !ecoModeEnabled;
+      lastShareChangeTimestamp = millis();
+    }
 
     // if (ps5.Options())  // Options Button ⚙️
 
@@ -139,32 +143,6 @@ void notify() {
     //   digitalWrite(BUILTIN_LED, 0);
 
 #endif
-
-#if BUTTONS
-    boolean sq = ps5.Square(), tr = ps5.Triangle();
-    if (sq)
-      Serial.print("🟨 SQUARE pressed");
-    if (tr)
-      Serial.print("🔺 TRIANGLE pressed");
-    if (sq | tr)
-      Serial.println();
-#endif
-
-    // Only needed to print the message properly on serial monitor. Else we dont need it.
-    //   if (millis() - lastTimeStamp > 50) {
-    // #if JOYSTICKS
-    //     Serial.printf("lx:%4d,ly:%4d,rx:%4d,ry:%4d\n", ps5.LStickX(), ps5.LStickY(),
-    //     ps5.RStickX(),
-    //                   ps5.RStickY());
-
-    // #endif
-    // #if SENSORS
-    //     Serial.printf("gx:%5d,gy:%5d,gz:%5d,ax:%5d,ay:%5d,az:%5d\n", ps5.GyrX(), ps5.GyrY(),
-    //     ps5.GyrZ(),
-    //                   ps5.AccX(), ps5.AccY(), ps5.AccZ());
-    // #endif
-    //     lastTimeStamp = millis();
-    //   }
   }
 }
 

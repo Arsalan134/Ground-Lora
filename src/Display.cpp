@@ -15,22 +15,6 @@ extern bool tlm_valid;
 extern unsigned long tlm_lastReceived;
 #endif
 
-// Helper: draw an inverted "pill" label (filled when active, outlined when inactive)
-static void drawPill(OLEDDisplay* display, int16_t x, int16_t y, const char* text, bool active) {
-  int16_t w = display->getStringWidth(text) + 4;
-  int16_t h = 11;
-  if (active) {
-    display->setColor(WHITE);
-    display->fillRect(x, y, w, h);
-    display->setColor(BLACK);
-    display->drawString(x + 2, y, text);
-    display->setColor(WHITE);
-  } else {
-    display->drawRect(x, y, w, h);
-    display->drawString(x + 2, y, text);
-  }
-}
-
 // Overlays are statically drawn on top of a frame eg. a clock
 OverlayCallback allOverlays[] = {/*wifiOverlay,*/ bluetoothOverlay, batteryOverlay, chargingOverlay};
 
@@ -64,11 +48,9 @@ void drawFrame1(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int1
   px += display->getStringWidth("ABRK") + 7;
   drawPill(display, px + x, 32 + y, "ACS", acsEngageEnabled);
   px += display->getStringWidth("ACS") + 7;
-  if (stabilityAssistValue > 10) {
-    int stabPct = map(stabilityAssistValue, 0, 255, 0, 99);
-    snprintf(buf, sizeof(buf), "SA:%d%%", stabPct);
-    display->drawString(px + x, 32 + y, buf);
-  }
+  int stabPct = map(stabilityAssistValue, 0, 255, 0, 100);
+  snprintf(buf, sizeof(buf), "SA:%d%%", stabPct);
+  display->drawString(px + x, 32 + y, buf);
 
   // ── Row 4 (y=43): Telemetry summary or Expo info ──
 #ifdef PROTO_BIDIRECTIONAL
@@ -101,10 +83,29 @@ void drawFrame1(OLEDDisplay* display, OLEDDisplayUiState* state, int16_t x, int1
   if (tlm_valid && (millis() - tlm_lastReceived < 3000)) {
     snprintf(buf, sizeof(buf), "%.1fC", (double)tlm_temperature);
     display->drawString(38 + x, 53 + y, buf);
-    snprintf(buf, sizeof(buf), "VS:%.1f", (double)tlm_verticalSpeed);
-    display->drawString(78 + x, 53 + y, buf);
   }
 #endif
+
+  // ⏱️ Uptime timer (always running from boot)
+  unsigned long uptimeSeconds = millis() / 1000UL;
+  unsigned long uptimeMinutes = uptimeSeconds / 60UL;
+  unsigned long uptimeRemainderSeconds = uptimeSeconds % 60UL;
+  char uptimeBuf[12];
+  snprintf(uptimeBuf, sizeof(uptimeBuf), "%lu:%02lu", uptimeMinutes, uptimeRemainderSeconds);
+
+  // 🌿 ECO mode indicator + uptime — bottom right
+  if (ecoModeEnabled) {
+    int16_t ecoWidth = display->getStringWidth("ECO") + 4;
+    int16_t ecoX = 128 + x - ecoWidth;
+    drawPill(display, ecoX, 53 + y, "ECO", true);
+    display->setTextAlignment(TEXT_ALIGN_RIGHT);
+    display->drawString(ecoX - 3, 53 + y, uptimeBuf);
+    display->setTextAlignment(TEXT_ALIGN_LEFT);
+  } else {
+    display->setTextAlignment(TEXT_ALIGN_RIGHT);
+    display->drawString(128 + x, 53 + y, uptimeBuf);
+    display->setTextAlignment(TEXT_ALIGN_LEFT);
+  }
 }
 
 // 🖼️ Frame 2: Expo/Rate Config + Extended Telemetry
@@ -209,9 +210,18 @@ void wifiOverlay(OLEDDisplay* display, OLEDDisplayUiState* state) {
   display->drawXbm(10, 0, wifiIcon::xres, wifiIcon::yres, wifiIcon::pixels);  // 📶 WiFi icon
 }
 
-void salam() {
-  // if (ps5.isConnected())
-  //   display.setOverlays(all, 2);
-  // else
-  //   display.setOverlays(wifiOverlays, 1);
+// Helper: draw an inverted "pill" label (filled when active, outlined when inactive)
+static void drawPill(OLEDDisplay* display, int16_t x, int16_t y, const char* text, bool active) {
+  int16_t w = display->getStringWidth(text) + 4;
+  int16_t h = 11;
+  if (active) {
+    display->setColor(WHITE);
+    display->fillRect(x, y, w, h);
+    display->setColor(BLACK);
+    display->drawString(x + 2, y, text);
+    display->setColor(WHITE);
+  } else {
+    display->drawRect(x, y, w, h);
+    display->drawString(x + 2, y, text);
+  }
 }
